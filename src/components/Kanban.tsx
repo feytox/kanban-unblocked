@@ -17,6 +17,7 @@ import { frontmatterKey } from '../parsers/common';
 import { Icon } from './Icon/Icon';
 import { Lanes } from './Lane/Lane';
 import { LaneForm } from './Lane/LaneForm';
+import { RelationOverlay } from './Relations/RelationOverlay';
 import { TableView } from './Table/Table';
 import { KanbanContext, SearchContext } from './context';
 import { baseClassName, c, useSearchValue } from './helpers';
@@ -260,6 +261,9 @@ export const Kanban = ({ view, stateManager }: KanbanProps) => {
                   <Icon name="lucide-x" />
                 </a>
               </div>
+            )}
+            {boardView !== 'table' && (
+              <RelationOverlay rootRef={rootRef} stateManager={stateManager} />
             )}
             {boardView === 'table' ? (
               <TableView boardData={boardData} stateManager={stateManager} />

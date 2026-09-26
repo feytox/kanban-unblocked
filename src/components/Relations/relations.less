@@ -116,3 +116,49 @@
     box-shadow: 0 0 0 2px var(--interactive-accent);
   }
 }
+
+.kanban-plugin__relation-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.kanban-plugin__relation-edge {
+  fill: none;
+  stroke: var(--interactive-accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.9;
+
+  &.is-resolved {
+    stroke: var(--text-faint);
+    stroke-dasharray: 2 4;
+  }
+
+  &.is-offscreen {
+    stroke-dasharray: 6 4;
+  }
+}
+
+.kanban-plugin__relation-arrowhead {
+  fill: var(--interactive-accent);
+
+  &.is-resolved {
+    fill: var(--text-faint);
+  }
+}
+
+.kanban-plugin__relation-outline {
+  fill: none;
+  stroke: var(--interactive-accent);
+  stroke-width: 1.5;
+  opacity: 0.45;
+
+  &.is-focus {
+    opacity: 0.9;
+  }
+}
