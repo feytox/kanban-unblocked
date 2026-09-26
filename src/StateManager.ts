@@ -9,7 +9,14 @@ import { Board, BoardTemplate, Item } from './components/types';
 import { ListFormat } from './parsers/List';
 import { BaseFormat, frontmatterKey, shouldRefreshBoard } from './parsers/common';
 import { getTaskStatusDone } from './parsers/helpers/inlineMetadata';
-import { defaultDateTrigger, defaultMetadataPosition, defaultTimeTrigger } from './settingHelpers';
+import { RelationStore } from './relations/RelationStore';
+import { itemCardAdapter } from './relations/cardAdapter';
+import {
+  defaultDateTrigger,
+  defaultMetadataPosition,
+  defaultTimeTrigger,
+  defaultUnlockTrigger,
+} from './settingHelpers';
 
 export class StateManager {
   onEmpty: () => void;
@@ -26,6 +33,9 @@ export class StateManager {
   file: TFile;
 
   parser: BaseFormat;
+  relations: RelationStore = new RelationStore(itemCardAdapter, () => {
+    return this.getAView()?.getWindow() ?? window;
+  });
 
   constructor(
     app: App,
@@ -73,6 +83,7 @@ export class StateManager {
       this.viewSet.delete(view);
 
       if (this.viewSet.size === 0) {
+        this.relations.destroy();
         this.onEmpty();
       }
     }
@@ -123,6 +134,7 @@ export class StateManager {
         this.compileSettings();
         this.state = this.parser.reparseBoard();
 
+        this.relations.update(this.state);
         this.stateReceivers.forEach((receiver) => receiver(this.state));
         this.settingsNotifiers.forEach((notifiers) => {
           notifiers.forEach((fn) => fn());
@@ -165,6 +177,7 @@ export class StateManager {
         this.saveToDisk();
       }
 
+      this.relations.update(this.state);
       this.stateReceivers.forEach((receiver) => receiver(this.state));
 
       if (oldSettings !== newSettings && newSettings) {
@@ -240,6 +253,8 @@ export class StateManager {
         this.getSettingRaw('inline-metadata-position', suppliedSettings) || defaultMetadataPosition,
       'time-format': timeFormat,
       'time-trigger': this.getSettingRaw('time-trigger', suppliedSettings) || defaultTimeTrigger,
+      'unlock-trigger':
+        this.getSettingRaw('unlock-trigger', suppliedSettings) || defaultUnlockTrigger,
       'link-date-to-daily-note': this.getSettingRaw('link-date-to-daily-note', suppliedSettings),
       'move-dates': this.getSettingRaw('move-dates', suppliedSettings),
       'move-tags': this.getSettingRaw('move-tags', suppliedSettings),
@@ -254,6 +269,9 @@ export class StateManager {
       'show-board-settings': this.getSettingRaw('show-board-settings', suppliedSettings) ?? true,
       'show-search': this.getSettingRaw('show-search', suppliedSettings) ?? true,
       'show-set-view': this.getSettingRaw('show-set-view', suppliedSettings) ?? true,
+      'show-relations': this.getSettingRaw('show-relations', suppliedSettings) ?? false,
+      'show-relations-button':
+        this.getSettingRaw('show-relations-button', suppliedSettings) ?? true,
       'tag-colors': this.getSettingRaw('tag-colors', suppliedSettings) ?? [],
       'tag-sort': this.getSettingRaw('tag-sort', suppliedSettings) ?? [],
       'date-colors': this.getSettingRaw('date-colors', suppliedSettings) ?? [],

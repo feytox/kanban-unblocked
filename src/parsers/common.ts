@@ -245,6 +245,7 @@ export function shouldRefreshBoard(oldSettings: KanbanSettings, newSettings: Kan
     'metadata-keys',
     'date-trigger',
     'time-trigger',
+    'unlock-trigger',
     'link-date-to-daily-note',
     'date-format',
     'time-format',

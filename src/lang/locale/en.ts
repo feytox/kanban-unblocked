@@ -274,6 +274,31 @@ const en = {
 
   // components/Editor/MarkdownEditor.tsx
   Submit: 'Submit',
+
+  // Kanban: Unblocked
+  Relations: 'Relations',
+  'Show relations on cards': 'Show relations on cards',
+  'When toggled, cards list the cards that block them and the cards they block. Relations are always shown when hovering or dragging a card.':
+    'When toggled, cards list the cards that block them and the cards they block. Relations are always shown when hovering or dragging a card.',
+  'Hide-until trigger': 'Hide-until trigger',
+  'Cards containing this followed by a date in curly braces are dimmed until that moment, e.g. @>{2026-10-01} or @>{2026-10-01 18:00}':
+    'Cards containing this followed by a date in curly braces are dimmed until that moment, e.g. @>{2026-10-01} or @>{2026-10-01 18:00}',
+  'Add blocker...': 'Add blocker...',
+  'Blocks...': 'Blocks...',
+  'Remove relation...': 'Remove relation...',
+  'Choose the card that blocks this one': 'Choose the card that blocks this one',
+  'Choose the card that this one blocks': 'Choose the card that this one blocks',
+  'Choose a relation to remove': 'Choose a relation to remove',
+  'Blocked by': 'Blocked by',
+  Blocks: 'Blocks',
+  Blocked: 'Blocked',
+  'This relation would create a cycle:': 'This relation would create a cycle:',
+  'The relation was reversed': 'The relation was reversed',
+  'Needed by': 'Needed by',
+  'Needed earlier for': 'Needed earlier for',
+  'Hide until...': 'Hide until...',
+  'Show now': 'Show now',
+  'Hidden until': 'Hidden until',
 };
 
 export type Lang = typeof en;

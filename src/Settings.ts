@@ -38,6 +38,7 @@ import {
   defaultDateTrigger,
   defaultMetadataPosition,
   defaultTimeTrigger,
+  defaultUnlockTrigger,
   getListOptions,
 } from './settingHelpers';
 import { cleanUpDateSettings, renderDateSettings } from './settings/DateColorSettings';
@@ -80,6 +81,8 @@ export interface KanbanSettings {
   'show-archive-all'?: boolean;
   'show-board-settings'?: boolean;
   'show-checkboxes'?: boolean;
+  'show-relations'?: boolean;
+  'show-relations-button'?: boolean;
   'show-relative-date'?: boolean;
   'show-search'?: boolean;
   'show-set-view'?: boolean;
@@ -90,6 +93,7 @@ export interface KanbanSettings {
   'tag-sort'?: TagSort[];
   'time-format'?: string;
   'time-trigger'?: string;
+  'unlock-trigger'?: string;
 }
 
 export interface KanbanViewSettings {
@@ -128,6 +132,8 @@ export const settingKeyLookup: Set<keyof KanbanSettings> = new Set([
   'show-archive-all',
   'show-board-settings',
   'show-checkboxes',
+  'show-relations',
+  'show-relations-button',
   'show-relative-date',
   'show-search',
   'show-set-view',
@@ -138,6 +144,7 @@ export const settingKeyLookup: Set<keyof KanbanSettings> = new Set([
   'tag-sort',
   'time-format',
   'time-trigger',
+  'unlock-trigger',
 ]);
 
 export type SettingRetriever = <K extends keyof KanbanSettings>(
@@ -1289,7 +1296,55 @@ export class SettingsManager {
       });
     });
 
+    contentEl.createEl('h4', { text: t('Relations') });
+
+    this.addToggleSetting(contentEl, local, {
+      key: 'show-relations',
+      name: t('Show relations on cards'),
+      desc: t(
+        'When toggled, cards list the cards that block them and the cards they block. Relations are always shown when hovering or dragging a card.'
+      ),
+      defaultValue: false,
+    });
+
+    new Setting(contentEl)
+      .setName(t('Hide-until trigger'))
+      .setDesc(
+        t(
+          'Cards containing this followed by a date in curly braces are dimmed until that moment, e.g. @>{2026-10-01} or @>{2026-10-01 18:00}'
+        )
+      )
+      .addText((text) => {
+        const [value, globalValue] = this.getSetting('unlock-trigger', local);
+
+        if (value || globalValue) {
+          text.setValue((value || globalValue) as string);
+        }
+
+        text.setPlaceholder((globalValue as string) || defaultUnlockTrigger);
+
+        text.onChange((newValue) => {
+          if (newValue) {
+            this.applySettingsUpdate({
+              'unlock-trigger': {
+                $set: newValue,
+              },
+            });
+          } else {
+            this.applySettingsUpdate({
+              $unset: ['unlock-trigger'],
+            });
+          }
+        });
+      });
+
     contentEl.createEl('h4', { text: t('Board Header Buttons') });
+
+    this.addToggleSetting(contentEl, local, {
+      key: 'show-relations-button',
+      name: t('Show relations on cards'),
+      defaultValue: true,
+    });
 
     new Setting(contentEl).setName(t('Add a list')).then((setting) => {
       let toggleComponent: ToggleComponent;
@@ -1530,6 +1585,57 @@ export class SettingsManager {
             });
         });
     });
+  }
+
+  addToggleSetting(
+    contentEl: HTMLElement,
+    local: boolean,
+    {
+      key,
+      name,
+      desc,
+      defaultValue,
+    }: { key: keyof KanbanSettings; name: string; desc?: string; defaultValue: boolean }
+  ) {
+    const setting = new Setting(contentEl).setName(name);
+    if (desc) setting.setDesc(desc);
+
+    let toggleComponent: ToggleComponent;
+
+    setting
+      .addToggle((toggle) => {
+        toggleComponent = toggle;
+
+        const [value, globalValue] = this.getSetting(key, local);
+
+        if (value !== undefined && value !== null) {
+          toggle.setValue(value as boolean);
+        } else if (globalValue !== undefined && globalValue !== null) {
+          toggle.setValue(globalValue as boolean);
+        } else {
+          toggle.setValue(defaultValue);
+        }
+
+        toggle.onChange((newValue) => {
+          this.applySettingsUpdate({
+            [key]: {
+              $set: newValue,
+            },
+          });
+        });
+      })
+      .addExtraButton((b) => {
+        b.setIcon('lucide-rotate-ccw')
+          .setTooltip(t('Reset to default'))
+          .onClick(() => {
+            const [, globalValue] = this.getSetting(key, local);
+            toggleComponent.setValue((globalValue as boolean) ?? defaultValue);
+
+            this.applySettingsUpdate({
+              $unset: [key],
+            });
+          });
+      });
   }
 
   cleanUp() {

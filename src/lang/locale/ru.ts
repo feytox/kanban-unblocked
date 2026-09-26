@@ -218,6 +218,31 @@ const lang: Partial<Lang> = {
 
   // components/Editor/MarkdownEditor.tsx
   Submit: 'Сохранить',
+
+  // Kanban: Unblocked
+  Relations: 'Связи',
+  'Show relations on cards': 'Показывать связи на карточках',
+  'When toggled, cards list the cards that block them and the cards they block. Relations are always shown when hovering or dragging a card.':
+    'Если включено, на карточках перечислены карточки, которые их блокируют и которые они блокируют. При наведении и перетаскивании связи показываются всегда.',
+  'Hide-until trigger': 'Триггер «скрыть до»',
+  'Cards containing this followed by a date in curly braces are dimmed until that moment, e.g. @>{2026-10-01} or @>{2026-10-01 18:00}':
+    'Карточки, содержащие этот триггер и дату в фигурных скобках, затемнены до этого момента, например @>{2026-10-01} или @>{2026-10-01 18:00}',
+  'Add blocker...': 'Добавить блокер...',
+  'Blocks...': 'Блокирует...',
+  'Remove relation...': 'Убрать связь...',
+  'Choose the card that blocks this one': 'Выберите карточку, которая блокирует эту',
+  'Choose the card that this one blocks': 'Выберите карточку, которую блокирует эта',
+  'Choose a relation to remove': 'Выберите связь, которую нужно убрать',
+  'Blocked by': 'Заблокирована',
+  Blocks: 'Блокирует',
+  Blocked: 'Заблокирована',
+  'This relation would create a cycle:': 'Эта связь создала бы цикл:',
+  'The relation was reversed': 'Направление связи изменено',
+  'Needed by': 'Нужно к',
+  'Needed earlier for': 'Нужно раньше для',
+  'Hide until...': 'Скрыть до...',
+  'Show now': 'Показать сейчас',
+  'Hidden until': 'Скрыта до',
 };
 
 export default lang;
