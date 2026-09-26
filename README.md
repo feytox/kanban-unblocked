@@ -6,13 +6,15 @@ Boards stay plain Markdown and remain compatible with the original plugin. On to
 
 ## What's new
 
-- **Blocking relations.** Right-click a card and pick _Add blocker..._ or _Blocks..._. One card can block several cards, and several cards can block one. _Remove relation..._ deletes a link.
+- **Blocking relations.** Hover a card and drag the small circle on its right edge onto another card: the first card now blocks the second (press Esc to cancel). You can also right-click a card and pick _Add blocker..._ or _Blocks..._. One card can block several cards, and several cards can block one. _Remove relation..._ deletes a link.
+  - A blocker is resolved when it's done, cancelled or archived, or when it sits in a list marked _Cards in this list don't block other cards_ (in the list's ⋯ menu). This suits lists like "Review". Moving the card out of that list makes it block again.
   - Blocked cards are dimmed and get a small lock icon. A card stops being blocked once all its blockers are done, cancelled or archived.
   - Hover a card (or start dragging it) to see arrows to every card it depends on or that depends on it, directly or through other cards.
   - The header button (or the pane menu on mobile) shows or hides the _Blocked by / Blocks_ list on each card. The setting is saved per board.
   - Cycles can't happen. If you link two cards the other way round, the relation just flips. A link that would close a longer cycle is refused, and a notice shows the cycle.
 - **Effective deadlines.** A card that blocks something due earlier than itself shows _Needed by &lt;date&gt;_. The card's own date isn't changed.
 - **Time-blocking.** Add `@>{2026-10-01}` or `@>{2026-10-01 18:00}` to a card, or right-click it and pick _Hide until..._. The card stays dimmed until that moment and becomes normal on its own, no reload needed. This suits recurring tasks that wait in a "reload" list. _Show now_ removes the token. The trigger can be changed in the settings.
+- **Settings import.** _Settings → Kanban: Unblocked → Import settings from Kanban_ copies the original plugin's global settings.
 - Existing boards keep working as before. Relations and hide-until tokens are the only additions to the file format.
 
 ### How relations are stored
