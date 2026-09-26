@@ -313,6 +313,17 @@ export class KanbanView extends TextFileView implements HoverParent {
     ).open();
   }
 
+  toggleRelationsOnCards() {
+    const stateManager = this.plugin.stateManagers.get(this.file);
+    const shown = !!stateManager.getSetting('show-relations');
+
+    stateManager.setState(
+      update(stateManager.state, {
+        data: { settings: { 'show-relations': { $set: !shown } } },
+      })
+    );
+  }
+
   onPaneMenu(menu: Menu, source: string, callSuper: boolean = true) {
     if (source !== 'more-options') {
       super.onPaneMenu(menu, source);
@@ -329,6 +340,15 @@ export class KanbanView extends TextFileView implements HoverParent {
             this.plugin.kanbanFileModes[(this.leaf as any).id || this.file.path] = 'markdown';
             this.plugin.setMarkdownView(this.leaf);
           });
+      })
+      .addItem((item) => {
+        const stateManager = this.plugin.stateManagers.get(this.file);
+        item
+          .setTitle(t('Show relations on cards'))
+          .setIcon('lucide-network')
+          .setChecked(!!stateManager?.getSetting('show-relations'))
+          .setSection('pane')
+          .onClick(() => this.toggleRelationsOnCards());
       })
       .addItem((item) => {
         item
@@ -463,6 +483,28 @@ export class KanbanView extends TextFileView implements HoverParent {
       this.actionButtons['show-archive-all'].remove();
       delete this.actionButtons['show-archive-all'];
     }
+
+    if (
+      stateManager.getSetting('show-relations-button') &&
+      !this.actionButtons['show-relations-button']
+    ) {
+      this.actionButtons['show-relations-button'] = this.addAction(
+        'lucide-network',
+        t('Show relations on cards'),
+        () => this.toggleRelationsOnCards()
+      );
+    } else if (
+      !stateManager.getSetting('show-relations-button') &&
+      this.actionButtons['show-relations-button']
+    ) {
+      this.actionButtons['show-relations-button'].remove();
+      delete this.actionButtons['show-relations-button'];
+    }
+
+    this.actionButtons['show-relations-button']?.toggleClass(
+      'is-active',
+      !!stateManager.getSetting('show-relations')
+    );
 
     if (stateManager.getSetting('show-add-list') && !this.actionButtons['show-add-list']) {
       const btn = this.addAction('lucide-plus-circle', t('Add a list'), () => {

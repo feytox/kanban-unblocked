@@ -12,8 +12,13 @@ import {
 import { Droppable, useNestedEntityPath } from 'src/dnd/components/Droppable';
 import { DndManagerContext } from 'src/dnd/components/context';
 import { useDragHandle } from 'src/dnd/managers/DragManager';
+import { t } from 'src/lang/helpers';
 import { frontmatterKey } from 'src/parsers/common';
+import { useCardInsight } from 'src/relations/RelationStore';
+import { CardInsight } from 'src/relations/insights';
 
+import { Icon } from '../Icon/Icon';
+import { RelationChips } from '../Relations/RelationChips';
 import { KanbanContext, SearchContext } from '../context';
 import { c } from '../helpers';
 import { EditState, EditingState, Item, isEditing } from '../types';
@@ -33,6 +38,7 @@ export interface DraggableItemProps {
 
 export interface ItemInnerProps {
   item: Item;
+  insight: CardInsight;
   isStatic?: boolean;
   shouldMarkItemsComplete?: boolean;
   isMatch?: boolean;
@@ -41,6 +47,7 @@ export interface ItemInnerProps {
 
 const ItemInner = memo(function ItemInner({
   item,
+  insight,
   shouldMarkItemsComplete,
   isMatch,
   searchQuery,
@@ -48,6 +55,8 @@ const ItemInner = memo(function ItemInner({
 }: ItemInnerProps) {
   const { stateManager, boardModifiers } = useContext(KanbanContext);
   const [editState, setEditState] = useState<EditState>(EditingState.cancel);
+  const showRelations = stateManager.useSetting('show-relations');
+  const isBlocked = insight.reasons.includes('blocked');
 
   const dndManager = useContext(DndManagerContext);
 
@@ -130,9 +139,23 @@ const ItemInner = memo(function ItemInner({
           editState={editState}
           isStatic={isStatic}
         />
+        {isBlocked && (
+          <span
+            className={c('item-blocked-icon')}
+            aria-label={`${t('Blocked by')}: ${insight.blockers
+              .filter((b) => !b.resolved)
+              .map((b) => b.title)
+              .join(', ')}`}
+          >
+            <Icon name="lucide-lock" />
+          </span>
+        )}
         <ItemMenuButton editState={editState} setEditState={setEditState} showMenu={showItemMenu} />
       </div>
       <ItemMetadata searchQuery={isMatch ? searchQuery : undefined} item={item} />
+      {showRelations && (
+        <RelationChips blockers={insight.blockers} dependents={insight.dependents} />
+      )}
     </div>
   );
 });
@@ -141,13 +164,15 @@ export const DraggableItem = memo(function DraggableItem(props: DraggableItemPro
   const elementRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
   const search = useContext(SearchContext);
+  const { stateManager } = useContext(KanbanContext);
 
   const { itemIndex, ...innerProps } = props;
+  const insight = useCardInsight(stateManager.relations, innerProps.item.id);
 
   const bindHandle = useDragHandle(measureRef, measureRef);
 
   const isMatch = search?.query ? innerProps.item.data.titleSearch.includes(search.query) : false;
-  const classModifiers: string[] = getItemClassModifiers(innerProps.item);
+  const classModifiers: string[] = getItemClassModifiers(innerProps.item, insight);
 
   return (
     <div
@@ -157,10 +182,16 @@ export const DraggableItem = memo(function DraggableItem(props: DraggableItemPro
       }}
       className={c('item-wrapper')}
     >
-      <div ref={elementRef} className={classcat([c('item'), ...classModifiers])}>
+      <div
+        ref={elementRef}
+        className={classcat([c('item'), ...classModifiers])}
+        data-item-id={innerProps.item.id}
+        data-block-id={innerProps.item.data.blockId}
+      >
         {props.isStatic ? (
           <ItemInner
             {...innerProps}
+            insight={insight}
             isMatch={isMatch}
             searchQuery={search?.query}
             isStatic={true}
@@ -173,7 +204,12 @@ export const DraggableItem = memo(function DraggableItem(props: DraggableItemPro
             index={itemIndex}
             data={props.item}
           >
-            <ItemInner {...innerProps} isMatch={isMatch} searchQuery={search?.query} />
+            <ItemInner
+              {...innerProps}
+              insight={insight}
+              isMatch={isMatch}
+              searchQuery={search?.query}
+            />
           </Droppable>
         )}
       </div>

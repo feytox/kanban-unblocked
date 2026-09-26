@@ -4,6 +4,7 @@ import { StateManager } from 'src/StateManager';
 import { Path } from 'src/dnd/types';
 import { buildLinkToDailyNote } from 'src/helpers';
 import { getTaskStatusDone } from 'src/parsers/helpers/inlineMetadata';
+import { CardInsight } from 'src/relations/insights';
 
 import { BoardModifiers } from '../../helpers/boardModifiers';
 import { getDefaultLocale } from '../Editor/datePickerLocale';
@@ -273,9 +274,14 @@ export function constructMenuTimePickerOnChange({
   };
 }
 
-export function getItemClassModifiers(item: Item) {
+export function getItemClassModifiers(item: Item, insight?: CardInsight) {
   const date = item.data.metadata.date;
   const classModifiers: string[] = [];
+
+  if (insight?.reasons.length) {
+    classModifiers.push('is-unavailable');
+    for (const reason of insight.reasons) classModifiers.push(`is-${reason}`);
+  }
 
   if (date) {
     if (date.isSame(new Date(), 'day')) {

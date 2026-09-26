@@ -1,0 +1,118 @@
+// Relations and availability. Only Obsidian CSS variables are used so every theme, light or dark,
+// gets matching colors.
+
+.kanban-plugin__item {
+  --unavailable-opacity: 0.55;
+
+  &.is-unavailable {
+    opacity: var(--unavailable-opacity);
+    filter: saturate(0.5);
+
+    &:hover,
+    &:focus-within {
+      opacity: 0.85;
+    }
+  }
+
+  &.is-flashing {
+    animation: kanban-plugin-flash 1.2s ease-out;
+  }
+}
+
+// The copy that follows the pointer while dragging should stay fully visible.
+.kanban-plugin__drag-container .kanban-plugin__item.is-unavailable {
+  opacity: 1;
+  filter: none;
+}
+
+@keyframes kanban-plugin-flash {
+  0%,
+  40% {
+    box-shadow: 0 0 0 2px var(--interactive-accent);
+  }
+  100% {
+    box-shadow: 0 0 0 2px transparent;
+  }
+}
+
+.kanban-plugin__item-blocked-icon {
+  display: flex;
+  align-items: flex-start;
+  flex-shrink: 0;
+  padding-block-start: 2px;
+  padding-inline: 2px;
+  color: var(--text-faint);
+
+  .kanban-plugin__icon,
+  svg {
+    width: var(--icon-xs);
+    height: var(--icon-xs);
+  }
+}
+
+.kanban-plugin__item-relations {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-2-2);
+  padding-block: var(--size-2-3);
+  padding-inline: var(--size-4-2);
+  border-top: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+  font-size: var(--font-ui-smaller);
+}
+
+.kanban-plugin__item-relation-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--size-2-2);
+  min-width: 0;
+}
+
+.kanban-plugin__item-relation-label {
+  color: var(--text-faint);
+}
+
+.kanban-plugin .kanban-plugin__item-relation-chip,
+.kanban-plugin__drag-container .kanban-plugin__item-relation-chip {
+  all: unset;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-block: 1px;
+  padding-inline: var(--size-4-1);
+  border-radius: var(--radius-s);
+  background: var(--background-modifier-hover);
+  color: var(--text-muted);
+  cursor: var(--cursor);
+  font-size: inherit;
+  line-height: var(--line-height-tight);
+
+  &:hover {
+    background: var(--background-modifier-active-hover);
+    color: var(--text-normal);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--background-modifier-border-focus);
+  }
+
+  &.is-resolved {
+    color: var(--text-faint);
+    text-decoration: line-through;
+  }
+}
+
+.kanban-plugin__card-suggest-note {
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kanban-plugin__item.is-flashing {
+    animation: none;
+    box-shadow: 0 0 0 2px var(--interactive-accent);
+  }
+}
