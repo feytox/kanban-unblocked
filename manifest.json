@@ -1,11 +1,11 @@
 {
-	"id": "obsidian-kanban",
-	"name": "Kanban",
-	"version": "2.0.51",
+	"id": "kanban-unblocked",
+	"name": "Kanban: Unblocked",
+	"version": "3.0.0",
 	"minAppVersion": "1.0.0",
-	"description": "Create markdown-backed Kanban boards in Obsidian.",
-	"author": "mgmeyers",
-	"authorUrl": "https://github.com/mgmeyers/obsidian-kanban",
-	"helpUrl": "https://publish.obsidian.md/kanban/Obsidian+Kanban+Plugin",
+	"description": "Markdown-backed Kanban boards with blocking relations between cards and time-blocking.",
+	"author": "Feytox",
+	"authorUrl": "https://github.com/feytox",
+	"helpUrl": "https://github.com/feytox/obsidian-kanban",
 	"isDesktopOnly": false
 }

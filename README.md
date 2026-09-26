@@ -1,18 +1,58 @@
-# Obsidian Kanban Plugin
+# Kanban: Unblocked
 
-**The Kanban plugin is looking for new maintainers.** Interested? [Read more here.](https://github.com/mgmeyers/obsidian-kanban/blob/main/MAINTAINERS.md)
+An opinionated, unofficial fork of the [Obsidian Kanban plugin](https://github.com/mgmeyers/obsidian-kanban) by mgmeyers, which is no longer maintained.
 
----
+Boards stay plain Markdown and remain compatible with the original plugin. On top of it, this fork helps answer one question: **what can I actually work on right now?**
 
-Create markdown-backed Kanban boards in [Obsidian](https://obsidian.md/)
+## What's new
 
-- [Bugs, Issues, & Feature Requests](https://github.com/mgmeyers/obsidian-kanban/issues)
-- [Development Roadmap](https://github.com/mgmeyers/obsidian-kanban/projects/1)
+- **Blocking relations.** Mark a card as blocked by one or more other cards (right-click a card → _Add blocker…_ / _Blocks…_). A card can block many cards, and many cards can block one.
+  - Blocked cards are dimmed and get a small lock icon. A card stops being blocked once all its blockers are done or archived.
+  - Hover a card, or grab it, to see arrows to every card it's connected to, directly or through other cards.
+  - Toggle the header button (or the _Show relations on cards_ board setting) to list blockers on the cards themselves.
+  - Cycles can't happen. Linking two cards the other way round just flips the relation. A link that would close a longer cycle is refused.
+- **Effective deadlines.** If a card blocks something that's due earlier than the card itself, the card shows that earlier date too (the card's own date isn't changed).
+- **Time-blocking.** Add `@>{2026-10-01}` or `@>{2026-10-01 18:00}` to a card (or right-click → _Hide until…_). The card stays dimmed until that moment, which suits recurring tasks that wait in a "reload" list.
 
-![Screen Shot 2021-09-16 at 12.58.22 PM.png](https://github.com/mgmeyers/obsidian-kanban/blob/main/docs/Assets/Screen%20Shot%202021-09-16%20at%2012.58.22%20PM.png)
+### How relations are stored
 
-![Screen Shot 2021-09-16 at 1.10.38 PM.png](https://github.com/mgmeyers/obsidian-kanban/blob/main/docs/Assets/Screen%20Shot%202021-09-16%20at%201.10.38%20PM.png)
+Each linked card gets a regular Obsidian block id (`^k3f9a1`) at the end of its first line. The links themselves go in a small block at the end of the board file, next to the settings block:
 
-## Documentation
+````md
+%% kanban:relations
+```
+{"blocked-by":{"k3f9a1":["p0x7qd"]}}
+```
+%%
+````
 
-Find the plugin documentation here: [Obsidian Kanban Plugin Documentation](https://publish.obsidian.md/kanban/)
+## Installation
+
+> Disable the original **Kanban** plugin first. Both plugins open the same board files, so they can't run at the same time.
+
+### With BRAT (recommended; desktop and mobile, with auto-updates)
+
+1. Install **BRAT** from _Settings → Community plugins → Browse_ and enable it.
+2. Run the command _BRAT: Add a beta plugin for testing_ and enter `feytox/obsidian-kanban`.
+3. Enable **Kanban: Unblocked** in _Settings → Community plugins_.
+
+Repeat on each device. If you sync your `.obsidian` folder between devices, installing it once is enough.
+
+### Manually
+
+Download `main.js`, `manifest.json` and `styles.css` from the [latest release](https://github.com/feytox/obsidian-kanban/releases/latest). Put them in `<vault>/.obsidian/plugins/kanban-unblocked/`, then enable the plugin.
+
+## Development
+
+```sh
+npm install
+npm run dev      # watch build
+npm test         # unit tests
+npm run build    # production build
+```
+
+To publish a release, run `npm version <x.y.z> --no-git-tag-version && npm run bump`, commit, then push a tag that matches the version. GitHub Actions attaches the build to the release.
+
+## License
+
+GPL-3.0, same as the original plugin.
