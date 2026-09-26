@@ -123,6 +123,23 @@ export const Kanban = ({ view, stateManager }: KanbanProps) => {
   }, [view]);
 
   useEffect(() => {
+    // Timers may not run while the app is in the background (e.g. a phone went to sleep), so
+    // re-check time-based state when it comes back.
+    const win = view.getWindow();
+    const refresh = () => {
+      if (win.document.visibilityState === 'visible') stateManager.relations.refresh();
+    };
+
+    win.addEventListener('focus', refresh);
+    win.document.addEventListener('visibilitychange', refresh);
+
+    return () => {
+      win.removeEventListener('focus', refresh);
+      win.document.removeEventListener('visibilitychange', refresh);
+    };
+  }, [view, stateManager]);
+
+  useEffect(() => {
     if (isSearching) {
       searchRef.current?.focus();
     }
