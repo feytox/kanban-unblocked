@@ -10,7 +10,6 @@ const svgNS = 'http://www.w3.org/2000/svg';
 const hoverDelay = 120;
 const itemClass = c('item');
 const dragContainerClass = c('drag-container');
-const laneItemsClass = c('lane-items');
 
 interface Box {
   left: number;
@@ -32,7 +31,25 @@ function findCard(root: HTMLElement, key: string, dragging: boolean): HTMLElemen
   return root.querySelector<HTMLElement>(selector);
 }
 
-function measure(el: HTMLElement, origin: DOMRect, isDragged: boolean): Box | null {
+/** The visible area of the closest ancestor (below the board root) that scrolls vertically. */
+function getVerticalClip(el: HTMLElement, root: HTMLElement): DOMRect | null {
+  for (let node = el.parentElement; node && node !== root; node = node.parentElement) {
+    if (node.scrollHeight <= node.clientHeight + 1) continue;
+
+    const { overflowY } = getComputedStyle(node);
+    if (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'hidden') {
+      return node.getBoundingClientRect();
+    }
+  }
+  return null;
+}
+
+function measure(
+  el: HTMLElement,
+  root: HTMLElement,
+  origin: DOMRect,
+  isDragged: boolean
+): Box | null {
   const rect = el.getBoundingClientRect();
   if (!rect.width && !rect.height) return null;
 
@@ -41,8 +58,7 @@ function measure(el: HTMLElement, origin: DOMRect, isDragged: boolean): Box | nu
   let offscreen = false;
 
   if (!isDragged) {
-    const scroller = el.closest(`.${laneItemsClass}`);
-    const clip = scroller?.getBoundingClientRect();
+    const clip = getVerticalClip(el, root);
 
     if (clip && (bottom < clip.top || top > clip.bottom)) {
       offscreen = true;
@@ -116,6 +132,11 @@ class OverlayController {
     this.listen(root, 'pointerleave', this.onPointerLeave);
     this.listen(root, 'scroll', this.requestDraw, { capture: true, passive: true });
     this.listen(root.win, 'resize', this.requestDraw, { passive: true });
+
+    // Layout can change without a window resize, e.g. when a sidebar is toggled.
+    const resizeObserver = new (root.win as typeof window).ResizeObserver(this.requestDraw);
+    resizeObserver.observe(root);
+    this.cleanup.push(() => resizeObserver.disconnect());
     this.cleanup.push(stateManager.relations.subscribe(this.requestDraw));
   }
 
@@ -165,6 +186,7 @@ class OverlayController {
 
     if (key === this.focusKey) {
       this.clearHoverTimer();
+      if (key) this.requestDraw();
       return;
     }
 
@@ -248,7 +270,7 @@ class OverlayController {
 
       const isDragged = this.dragging && card.key === key;
       const el = findCard(this.root, card.key, isDragged);
-      const box = el && measure(el, origin, isDragged);
+      const box = el && measure(el, this.root, origin, isDragged);
       if (box) boxes.set(blockId, box);
     }
 
