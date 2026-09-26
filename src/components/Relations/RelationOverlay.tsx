@@ -292,7 +292,8 @@ class OverlayController {
     for (const [blocker, blocked] of edges) {
       const from = boxes.get(blocker);
       const to = boxes.get(blocked);
-      if (!from || !to) continue;
+      // Neither card is visible: an edge between two list edges would only add noise.
+      if (!from || !to || (from.offscreen && to.offscreen)) continue;
 
       const resolved = insights.index.getNode(blocker).resolved;
       const path = doc.createElementNS(svgNS, 'path');

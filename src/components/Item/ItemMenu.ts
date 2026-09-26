@@ -5,10 +5,11 @@ import { StateManager } from 'src/StateManager';
 import { Path } from 'src/dnd/types';
 import { moveEntity } from 'src/dnd/util/data';
 import { t } from 'src/lang/helpers';
+import { generateUniqueBlockId, getBoardBlockIds } from 'src/parsers/formats/list';
 import { addHideUntilMenuItems, addRelationMenuItems } from 'src/relations/menu';
 
 import { BoardModifiers } from '../../helpers/boardModifiers';
-import { applyTemplate, escapeRegExpStr, generateInstanceId } from '../helpers';
+import { applyTemplate, escapeRegExpStr } from '../helpers';
 import { EditState, Item } from '../types';
 import {
   constructDatePicker,
@@ -107,7 +108,7 @@ export function useItemMenu({
                   )}`
                 );
               } else {
-                const id = generateInstanceId(6);
+                const id = generateUniqueBlockId(getBoardBlockIds(stateManager.state));
 
                 navigator.clipboard.writeText(
                   `${this.app.fileManager.generateMarkdownLink(stateManager.file, '', '#^' + id)}`
