@@ -1,4 +1,5 @@
 import {
+  Row,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -9,6 +10,7 @@ import classcat from 'classcat';
 import update from 'immutability-helper';
 import { useEffect, useMemo, useRef } from 'preact/compat';
 import { IntersectionObserverHandler } from 'src/dnd/managers/ScrollManager';
+import { useCardInsight } from 'src/relations/RelationStore';
 
 import { StateManager } from '../../StateManager';
 import { Icon } from '../Icon/Icon';
@@ -16,6 +18,7 @@ import { IntersectionObserverContext } from '../context';
 import { c } from '../helpers';
 import { Board } from '../types';
 import { fuzzyAnyFilter, useTableColumns } from './helpers';
+import { TableItem } from './types';
 
 function useIntersectionObserver() {
   const observerRef = useRef<IntersectionObserver>();
@@ -196,34 +199,47 @@ export function TableView({
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map((cell) => {
-                  return (
-                    <td
-                      key={cell.id}
-                      className={classcat({
-                        'mod-has-icon': cell.column.id === 'lane',
-                        'mod-search-match': row.columnFiltersMeta[cell.column.id]
-                          ? (row.columnFiltersMeta[cell.column.id] as any).itemRank.passed
-                          : false,
-                      })}
-                    >
-                      <div
-                        className={c('table-cell-wrapper')}
-                        style={{
-                          width: cell.column.getSize(),
-                        }}
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </div>
-                    </td>
-                  );
-                })}
-              </tr>
+              <TableRow key={row.id} row={row} stateManager={stateManager} />
             ))}
           </tbody>
         </table>
       </IntersectionObserverContext.Provider>
     </div>
+  );
+}
+
+interface TableRowProps {
+  row: Row<TableItem>;
+  stateManager: StateManager;
+}
+
+function TableRow({ row, stateManager }: TableRowProps) {
+  const insight = useCardInsight(stateManager.relations, row.original.item.id);
+
+  return (
+    <tr className={classcat({ 'is-unavailable': insight.reasons.length > 0 })}>
+      {row.getVisibleCells().map((cell) => {
+        return (
+          <td
+            key={cell.id}
+            className={classcat({
+              'mod-has-icon': cell.column.id === 'lane',
+              'mod-search-match': row.columnFiltersMeta[cell.column.id]
+                ? (row.columnFiltersMeta[cell.column.id] as any).itemRank.passed
+                : false,
+            })}
+          >
+            <div
+              className={c('table-cell-wrapper')}
+              style={{
+                width: cell.column.getSize(),
+              }}
+            >
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </div>
+          </td>
+        );
+      })}
+    </tr>
   );
 }
