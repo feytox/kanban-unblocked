@@ -138,6 +138,7 @@ const ItemInner = memo(function ItemInner({
           setEditState={setEditState}
           editState={editState}
           isStatic={isStatic}
+          inheritedDeadline={insight.inheritedDeadline}
         />
         {isBlocked && (
           <span

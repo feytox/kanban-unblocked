@@ -13,12 +13,14 @@ import { StateManager } from 'src/StateManager';
 import { useNestedEntityPath } from 'src/dnd/components/Droppable';
 import { Path } from 'src/dnd/types';
 import { getTaskStatusDone, toggleTaskString } from 'src/parsers/helpers/inlineMetadata';
+import { CardInsight } from 'src/relations/insights';
 
 import { MarkdownEditor, allowNewLine } from '../Editor/MarkdownEditor';
 import {
   MarkdownClonedPreviewRenderer,
   MarkdownRenderer,
 } from '../MarkdownRenderer/MarkdownRenderer';
+import { InheritedDeadline } from '../Relations/InheritedDeadline';
 import { KanbanContext, SearchContext } from '../context';
 import { c, useGetDateColorFn, useGetTagColorFn } from '../helpers';
 import { EditState, EditingState, Item, isEditing } from '../types';
@@ -80,6 +82,7 @@ export interface ItemContentProps {
   setEditState: Dispatch<StateUpdater<EditState>>;
   searchQuery?: string;
   showMetadata?: boolean;
+  inheritedDeadline?: CardInsight['inheritedDeadline'];
   editState: EditState;
   isStatic: boolean;
 }
@@ -186,6 +189,7 @@ export const ItemContent = memo(function ItemContent({
   setEditState,
   searchQuery,
   showMetadata = true,
+  inheritedDeadline,
   isStatic,
 }: ItemContentProps) {
   const { stateManager, filePath, boardModifiers } = useContext(KanbanContext);
@@ -302,6 +306,7 @@ export const ItemContent = memo(function ItemContent({
             filePath={filePath}
             getDateColor={getDateColor}
           />
+          <InheritedDeadline deadline={inheritedDeadline} />
           <InlineMetadata item={item} stateManager={stateManager} />
           <Tags tags={item.data.metadata.tags} searchQuery={searchQuery} />
         </div>
