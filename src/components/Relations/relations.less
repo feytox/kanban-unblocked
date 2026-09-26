@@ -215,3 +215,41 @@
 .kanban-plugin__table-wrapper tr:not(.is-time-blocked) .kanban-plugin__preview-unlock {
   display: none;
 }
+
+.kanban-plugin__link-handle {
+  position: absolute;
+  z-index: 6;
+  width: 12px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+  border: 2px solid var(--interactive-accent);
+  border-radius: 50%;
+  background: var(--background-primary);
+  cursor: crosshair;
+  touch-action: none;
+  opacity: 0.7;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+
+  &:hover,
+  &.is-linking {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.25);
+  }
+}
+
+.kanban-plugin__relation-edge.is-draft {
+  stroke-dasharray: 5 4;
+}
+
+.kanban-plugin__relation-outline.is-link-target {
+  opacity: 1;
+  stroke-width: 2.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kanban-plugin__link-handle {
+    transition: none;
+  }
+}

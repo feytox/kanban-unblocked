@@ -2,6 +2,8 @@ import { useContext, useEffect } from 'preact/compat';
 import { StateManager } from 'src/StateManager';
 import { DndManagerContext } from 'src/dnd/components/context';
 import { DragEventData } from 'src/dnd/managers/DragManager';
+import { t } from 'src/lang/helpers';
+import { linkBlocker } from 'src/relations/actions';
 
 import { c } from '../helpers';
 import { DataTypes } from '../types';
@@ -101,9 +103,21 @@ function connectorPath(from: Box, to: Box) {
   return `M ${x1} ${fromCenterY} C ${x1 + dx} ${fromCenterY}, ${x2 - dx} ${toCenterY}, ${x2} ${toCenterY}`;
 }
 
+interface LinkingState {
+  sourceKey: string;
+  pointerId: number;
+  x: number;
+  y: number;
+  targetKey: string | null;
+}
+
 class OverlayController {
   private svg: SVGSVGElement;
   private layer: SVGGElement;
+  /** Grab this to draw a new relation from the hovered card to another one. */
+  private handle: HTMLElement;
+  private handleKey: string | null = null;
+  private linking: LinkingState | null = null;
   private focusKey: string | null = null;
   private dragging = false;
   private frame: number | null = null;
@@ -127,6 +141,21 @@ class OverlayController {
     this.layer = doc.createElementNS(svgNS, 'g');
     this.svg.appendChild(this.layer);
     root.appendChild(this.svg);
+
+    this.handle = root.createDiv({
+      cls: c('link-handle'),
+      attr: {
+        'aria-label': t('Drag onto a card that this one blocks'),
+        'data-ignore-drag': 'true',
+      },
+    });
+    this.handle.hide();
+    this.listen(this.handle, 'pointerdown', this.onHandlePointerDown);
+    this.listen(this.handle, 'pointermove', this.onHandlePointerMove);
+    this.listen(this.handle, 'pointerup', this.onHandlePointerUp);
+    this.listen(this.handle, 'pointercancel', this.cancelLinking);
+    this.listen(this.handle, 'lostpointercapture', this.cancelLinking);
+    this.listen(root.doc, 'keydown', this.onKeyDown, { capture: true });
 
     this.listen(root, 'pointerover', this.onPointerOver);
     this.listen(root, 'pointerleave', this.onPointerLeave);
@@ -179,9 +208,13 @@ class OverlayController {
   }
 
   private onPointerOver = (e: PointerEvent) => {
-    if (this.dragging || e.pointerType === 'touch') return;
+    if (this.dragging || this.linking || e.pointerType === 'touch') return;
+    // Moving onto the handle keeps the card it belongs to hovered.
+    if (this.handle.contains(e.target as Node)) return;
 
     const card = (e.target as Element).closest?.(`.${itemClass}[data-item-id]`) as HTMLElement;
+    this.setHandleCard(card && !card.querySelector('.cm-editor') ? card.dataset.itemId : null);
+
     const key = card && this.hasRelations(card.dataset.itemId) ? card.dataset.itemId : null;
 
     if (key === this.focusKey) {
@@ -198,10 +231,102 @@ class OverlayController {
   };
 
   private onPointerLeave = () => {
-    if (this.dragging) return;
+    if (this.dragging || this.linking) return;
     this.clearHoverTimer();
+    this.setHandleCard(null);
     this.setFocus(null);
   };
+
+  private setHandleCard(key: string | null) {
+    if (key === this.handleKey) return;
+    this.handleKey = key;
+    this.requestDraw();
+  }
+
+  private positionHandle(origin: DOMRect) {
+    const el = this.handleKey && !this.dragging && findCard(this.root, this.handleKey, false);
+    const box = el && measure(el, this.root, origin, false);
+
+    if (!box || box.offscreen) {
+      this.handle.hide();
+      return;
+    }
+
+    this.handle.style.left = `${box.right + 4}px`;
+    this.handle.style.top = `${(box.top + box.bottom) / 2}px`;
+    this.handle.show();
+  }
+
+  private findTargetKey(x: number, y: number, sourceKey: string) {
+    const hit = this.root.doc.elementFromPoint(x, y);
+    const card = hit?.closest?.(`.${itemClass}[data-item-id]`) as HTMLElement;
+    if (!card || !this.root.contains(card)) return null;
+    const key = card.dataset.itemId;
+    return key === sourceKey ? null : key;
+  }
+
+  private onHandlePointerDown = (e: PointerEvent) => {
+    if (e.button !== 0 || !this.handleKey) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      this.handle.setPointerCapture(e.pointerId);
+    } catch (err) {
+      // The pointer may already be gone; linking still works without capture.
+    }
+    this.handle.addClass('is-linking');
+    this.clearHoverTimer();
+    this.linking = {
+      sourceKey: this.handleKey,
+      pointerId: e.pointerId,
+      x: e.clientX,
+      y: e.clientY,
+      targetKey: null,
+    };
+    this.requestDraw();
+  };
+
+  private onHandlePointerMove = (e: PointerEvent) => {
+    const linking = this.linking;
+    if (!linking || e.pointerId !== linking.pointerId) return;
+
+    linking.x = e.clientX;
+    linking.y = e.clientY;
+    linking.targetKey = this.findTargetKey(e.clientX, e.clientY, linking.sourceKey);
+    this.requestDraw();
+  };
+
+  private onHandlePointerUp = (e: PointerEvent) => {
+    const linking = this.linking;
+    if (!linking || e.pointerId !== linking.pointerId) return;
+
+    const targetKey = this.findTargetKey(e.clientX, e.clientY, linking.sourceKey);
+    this.stopLinking();
+
+    // Dragging from A onto B means "A blocks B", the same direction the arrows are drawn in.
+    if (targetKey) linkBlocker(this.stateManager, targetKey, linking.sourceKey);
+  };
+
+  private onKeyDown = (e: KeyboardEvent) => {
+    if (this.linking && e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      this.cancelLinking();
+    }
+  };
+
+  private cancelLinking = () => {
+    if (this.linking) this.stopLinking();
+  };
+
+  private stopLinking() {
+    const { pointerId } = this.linking;
+    this.linking = null;
+    this.handle.removeClass('is-linking');
+    if (this.handle.hasPointerCapture(pointerId)) this.handle.releasePointerCapture(pointerId);
+    this.requestDraw();
+  }
 
   onDragStart = ({ dragEntity }: DragEventData) => {
     const data = dragEntity?.getData();
@@ -249,6 +374,15 @@ class OverlayController {
   };
 
   private draw() {
+    const origin = this.root.getBoundingClientRect();
+    this.positionHandle(origin);
+
+    if (this.linking) {
+      this.layer.empty();
+      this.drawLinking(origin);
+      return;
+    }
+
     const key = this.focusKey;
     if (!key && !this.layer.hasChildNodes()) return;
 
@@ -261,7 +395,6 @@ class OverlayController {
     if (!focusBlockId) return;
 
     const { ids, edges } = insights.index.getConnected(focusBlockId);
-    const origin = this.root.getBoundingClientRect();
     const boxes = new Map<string, Box>();
 
     for (const blockId of ids) {
@@ -277,16 +410,7 @@ class OverlayController {
     const doc = this.root.doc;
 
     for (const [blockId, box] of boxes) {
-      if (box.offscreen) continue;
-      const rect = doc.createElementNS(svgNS, 'rect');
-      rect.setAttribute('x', String(box.left - 2));
-      rect.setAttribute('y', String(box.top - 2));
-      rect.setAttribute('width', String(box.right - box.left + 4));
-      rect.setAttribute('height', String(box.bottom - box.top + 4));
-      rect.setAttribute('rx', '6');
-      rect.addClass(c('relation-outline'));
-      if (blockId === focusBlockId) rect.addClass('is-focus');
-      this.layer.appendChild(rect);
+      if (!box.offscreen) this.drawOutline(box, blockId === focusBlockId ? 'is-focus' : null);
     }
 
     for (const [blocker, blocked] of edges) {
@@ -306,6 +430,41 @@ class OverlayController {
     }
   }
 
+  private drawOutline(box: Box, modifier: string | null) {
+    const rect = this.root.doc.createElementNS(svgNS, 'rect');
+    rect.setAttribute('x', String(box.left - 2));
+    rect.setAttribute('y', String(box.top - 2));
+    rect.setAttribute('width', String(box.right - box.left + 4));
+    rect.setAttribute('height', String(box.bottom - box.top + 4));
+    rect.setAttribute('rx', '6');
+    rect.addClass(c('relation-outline'));
+    if (modifier) rect.addClass(modifier);
+    this.layer.appendChild(rect);
+  }
+
+  private drawLinking(origin: DOMRect) {
+    const { sourceKey, targetKey, x, y } = this.linking;
+    const sourceEl = findCard(this.root, sourceKey, false);
+    const source = sourceEl && measure(sourceEl, this.root, origin, false);
+    if (!source) return;
+
+    this.drawOutline(source, 'is-focus');
+
+    const targetEl = targetKey && findCard(this.root, targetKey, false);
+    const target = targetEl && measure(targetEl, this.root, origin, false);
+    if (target) this.drawOutline(target, 'is-link-target');
+
+    const px = x - origin.left;
+    const py = y - origin.top;
+    const pointer: Box = { left: px, right: px, top: py, bottom: py, offscreen: false };
+
+    const path = this.root.doc.createElementNS(svgNS, 'path');
+    path.setAttribute('d', connectorPath(source, target || pointer));
+    path.setAttribute('marker-end', `url(#${this.markerId('open')})`);
+    path.addClass(c('relation-edge'), 'is-draft');
+    this.layer.appendChild(path);
+  }
+
   private findBlockId(key: string) {
     const el = findCard(this.root, key, this.dragging);
     return el?.dataset.blockId || null;
@@ -316,6 +475,7 @@ class OverlayController {
     if (this.frame !== null) this.root.win.cancelAnimationFrame(this.frame);
     this.cleanup.forEach((fn) => fn());
     this.svg.remove();
+    this.handle.remove();
   }
 }
 
