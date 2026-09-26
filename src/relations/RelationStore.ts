@@ -35,7 +35,7 @@ export function boardToCards(board: Board, adapter: CardAdapter): CardInfo[] {
   };
 
   for (const lane of board.children) {
-    const marksComplete = !!lane.data.shouldMarkItemsComplete;
+    const marksComplete = !!(lane.data.shouldMarkItemsComplete || lane.data.resolvesBlockers);
     for (const item of lane.children) cards.push(toCard(item, false, marksComplete));
   }
 

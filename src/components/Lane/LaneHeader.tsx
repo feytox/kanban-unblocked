@@ -151,6 +151,15 @@ export const LaneHeader = memo(function LaneHeader({
           title={lane.data.title}
         />
 
+        {lane.data.resolvesBlockers && (
+          <span
+            className={c('lane-unblocking-icon')}
+            aria-label={t("Cards in this list don't block other cards")}
+          >
+            <Icon name="lucide-unlock" />
+          </span>
+        )}
+
         <LaneLimitCounter
           editState={editState}
           itemCount={lane.children.length}

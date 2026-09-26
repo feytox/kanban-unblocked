@@ -198,3 +198,20 @@
 .kanban-plugin__table-wrapper tr.is-unavailable td {
   opacity: 0.55;
 }
+
+.kanban-plugin__lane-unblocking-icon {
+  display: flex;
+  align-items: center;
+  color: var(--text-faint);
+
+  svg {
+    width: var(--icon-xs);
+    height: var(--icon-xs);
+  }
+}
+
+// The token stays in the card text; only show it while the card is still hidden.
+.kanban-plugin__item:not(.is-time-blocked) .kanban-plugin__preview-unlock,
+.kanban-plugin__table-wrapper tr:not(.is-time-blocked) .kanban-plugin__preview-unlock {
+  display: none;
+}

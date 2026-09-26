@@ -23,7 +23,12 @@ import { relationsToCodeblock } from 'src/relations/serialize';
 import { BoardRelations } from 'src/relations/types';
 import { visit } from 'unist-util-visit';
 
-import { archiveString, completeString, settingsToCodeblock } from '../common';
+import {
+  archiveString,
+  completeString,
+  resolvesBlockersString,
+  settingsToCodeblock,
+} from '../common';
 import { DateNode, FileNode, TimeNode, ValueNode } from '../extensions/types';
 import {
   ContentBoundary,
@@ -306,12 +311,18 @@ export function astToUnhydratedBoard(
       const title = getStringFromBoundary(md, headingBoundary);
 
       let shouldMarkItemsComplete = false;
+      let resolvesBlockers = false;
 
       const list = getNextOfType(root.children, index, 'list', (child) => {
         if (child.type === 'heading') return false;
 
         if (child.type === 'paragraph') {
           const childStr = toString(child);
+
+          if (childStr === resolvesBlockersString) {
+            resolvesBlockers = true;
+            return true;
+          }
 
           if (childStr.startsWith('%% kanban:')) {
             return false;
@@ -348,6 +359,7 @@ export function astToUnhydratedBoard(
           data: {
             ...parseLaneTitle(title),
             shouldMarkItemsComplete,
+            ...(resolvesBlockers ? { resolvesBlockers } : {}),
           },
         });
       } else {
@@ -365,6 +377,7 @@ export function astToUnhydratedBoard(
           data: {
             ...parseLaneTitle(title),
             shouldMarkItemsComplete,
+            ...(resolvesBlockers ? { resolvesBlockers } : {}),
           },
         });
       }
@@ -466,6 +479,11 @@ function laneToMd(lane: Lane) {
   lines.push(`## ${replaceNewLines(laneTitleWithMaxItems(lane.data.title, lane.data.maxItems))}`);
 
   lines.push('');
+
+  if (lane.data.resolvesBlockers) {
+    // Its own paragraph, so it never merges with the "Complete" marker below.
+    lines.push(resolvesBlockersString, '');
+  }
 
   if (lane.data.shouldMarkItemsComplete) {
     lines.push(completeString);

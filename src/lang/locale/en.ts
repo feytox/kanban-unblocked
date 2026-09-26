@@ -276,6 +276,15 @@ const en = {
   Submit: 'Submit',
 
   // Kanban: Unblocked
+  "Cards in this list don't block other cards": "Cards in this list don't block other cards",
+  'Drag onto a card that this one blocks': 'Drag onto a card that this one blocks',
+  'Import settings from Kanban': 'Import settings from Kanban',
+  'Copy the global settings of the original Kanban plugin (obsidian-kanban) into this plugin. Current global settings are replaced.':
+    'Copy the global settings of the original Kanban plugin (obsidian-kanban) into this plugin. Current global settings are replaced.',
+  Import: 'Import',
+  'Settings imported': 'Settings imported',
+  'Settings of the original Kanban plugin were not found':
+    'Settings of the original Kanban plugin were not found',
   Relations: 'Relations',
   'Show relations on cards': 'Show relations on cards',
   'When toggled, cards list the cards that block them and the cards they block. Relations are always shown when hovering or dragging a card.':

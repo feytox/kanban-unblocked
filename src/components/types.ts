@@ -16,6 +16,8 @@ export enum LaneSort {
 
 export interface LaneData {
   shouldMarkItemsComplete?: boolean;
+  /** Cards in this list count as done for blocking relations, without being checked. */
+  resolvesBlockers?: boolean;
   title: string;
   maxItems?: number;
   dom?: HTMLDivElement;

@@ -33,6 +33,36 @@ export function generateInstanceId(len: number = 9): string {
     .slice(2, 2 + len);
 }
 
+/** Re-created items (e.g. after a Tasks toggle) must keep their block id, or relations are lost. */
+function keepBlockId(next: Item, original: Item): Item {
+  if (!original.data.blockId || next.data.blockId) return next;
+  return update(next, { data: { blockId: { $set: original.data.blockId } } });
+}
+
+/** Marks an item as done, letting the Tasks plugin handle it when enabled (e.g. recurrence). */
+export function completeItem(stateManager: StateManager, item: Item): Item[] {
+  if (item.data.checked && item.data.checkChar === getTaskStatusDone()) return [item];
+
+  const updates = toggleTask(
+    update(item, { data: { checkChar: { $set: getTaskStatusPreDone() } } }),
+    stateManager.file
+  );
+
+  if (updates) {
+    const [itemStrings, checkChars, thisIndex] = updates;
+    return itemStrings.map((str, i) => {
+      const next = stateManager.getNewItem(str, checkChars[i]);
+      return i === thisIndex ? keepBlockId(next, item) : next;
+    });
+  }
+
+  return [
+    update(item, {
+      data: { checked: { $set: true }, checkChar: { $set: getTaskStatusDone() } },
+    }),
+  ];
+}
+
 export function maybeCompleteForMove(
   sourceStateManager: StateManager,
   sourceBoard: Board,
@@ -69,7 +99,7 @@ export function maybeCompleteForMove(
 
     itemStrings.forEach((str, i) => {
       if (i === thisIndex) {
-        next = destinationStateManager.getNewItem(str, checkChars[i]);
+        next = keepBlockId(destinationStateManager.getNewItem(str, checkChars[i]), item);
       } else {
         replacement = destinationStateManager.getNewItem(str, checkChars[i]);
       }

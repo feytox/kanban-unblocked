@@ -22,6 +22,7 @@ export interface BaseFormat {
 
 export const completeString = `**${t('Complete')}**`;
 export const archiveString = '***';
+export const resolvesBlockersString = '%% kanban:unblocking %%';
 export const basicFrontmatter = ['---', '', `${frontmatterKey}: board`, '', '---', '', ''].join(
   '\n'
 );

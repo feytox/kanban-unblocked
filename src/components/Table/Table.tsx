@@ -217,7 +217,12 @@ function TableRow({ row, stateManager }: TableRowProps) {
   const insight = useCardInsight(stateManager.relations, row.original.item.id);
 
   return (
-    <tr className={classcat({ 'is-unavailable': insight.reasons.length > 0 })}>
+    <tr
+      className={classcat([
+        { 'is-unavailable': insight.reasons.length > 0 },
+        ...insight.reasons.map((reason) => `is-${reason}`),
+      ])}
+    >
       {row.getVisibleCells().map((cell) => {
         return (
           <td

@@ -220,6 +220,15 @@ const lang: Partial<Lang> = {
   Submit: 'Сохранить',
 
   // Kanban: Unblocked
+  "Cards in this list don't block other cards": 'Карточки в этом списке не блокируют другие',
+  'Drag onto a card that this one blocks': 'Перетащите на карточку, которую блокирует эта',
+  'Import settings from Kanban': 'Импорт настроек из Kanban',
+  'Copy the global settings of the original Kanban plugin (obsidian-kanban) into this plugin. Current global settings are replaced.':
+    'Скопировать глобальные настройки оригинального плагина Kanban (obsidian-kanban) в этот плагин. Текущие глобальные настройки будут заменены.',
+  Import: 'Импортировать',
+  'Settings imported': 'Настройки импортированы',
+  'Settings of the original Kanban plugin were not found':
+    'Настройки оригинального плагина Kanban не найдены',
   Relations: 'Связи',
   'Show relations on cards': 'Показывать связи на карточках',
   'When toggled, cards list the cards that block them and the cards they block. Relations are always shown when hovering or dragging a card.':

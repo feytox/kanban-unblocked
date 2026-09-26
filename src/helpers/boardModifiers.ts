@@ -14,8 +14,10 @@ import {
   updateParentEntity,
 } from 'src/dnd/util/data';
 
-import { generateInstanceId } from '../components/helpers';
+import { completeItem, generateInstanceId } from '../components/helpers';
 import { Board, DataTypes, Item, Lane } from '../components/types';
+
+export type LaneFlag = 'shouldMarkItemsComplete' | 'resolvesBlockers';
 
 export interface BoardModifiers {
   appendItems: (path: Path, items: Item[]) => void;
@@ -28,6 +30,7 @@ export interface BoardModifiers {
   addLane: (lane: Lane) => void;
   insertLane: (path: Path, lane: Lane) => void;
   updateLane: (path: Path, lane: Lane) => void;
+  setLaneFlag: (path: Path, flag: LaneFlag, value: boolean) => void;
   archiveLane: (path: Path) => void;
   archiveLaneItems: (path: Path) => void;
   deleteEntity: (path: Path) => void;
@@ -139,6 +142,26 @@ export function getBoardModifiers(view: KanbanView, stateManager: StateManager):
           },
         })
       );
+    },
+
+    setLaneFlag: (path: Path, flag: LaneFlag, value: boolean) => {
+      stateManager.setState((boardData) => {
+        const lane: Lane = getEntityFromPath(boardData, path);
+        const children =
+          flag === 'shouldMarkItemsComplete' && value
+            ? // Cards already in the list become complete too, not only the ones moved in later.
+              lane.children.flatMap((item) => completeItem(stateManager, item))
+            : lane.children;
+
+        return updateParentEntity(boardData, path, {
+          children: {
+            [path[path.length - 1]]: {
+              children: { $set: children },
+              data: { [flag]: { $set: value } },
+            },
+          },
+        });
+      });
     },
 
     archiveLane: (path: Path) => {
