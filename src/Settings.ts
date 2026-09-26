@@ -3,9 +3,11 @@ import {
   App,
   DropdownComponent,
   Modal,
+  Notice,
   PluginSettingTab,
   Setting,
   ToggleComponent,
+  normalizePath,
 } from 'obsidian';
 
 import { KanbanView } from './KanbanView';
@@ -162,6 +164,30 @@ export interface SettingsManagerConfig {
   onSettingsChange: (newSettings: KanbanSettings) => void;
 }
 
+const originalPluginId = 'obsidian-kanban';
+
+/** Reads the global settings of the original Kanban plugin, keeping only known keys. */
+async function readOriginalPluginSettings(app: App): Promise<KanbanSettings | null> {
+  const path = normalizePath(`${app.vault.configDir}/plugins/${originalPluginId}/data.json`);
+
+  try {
+    if (!(await app.vault.adapter.exists(path))) return null;
+
+    const raw = JSON.parse(await app.vault.adapter.read(path));
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+
+    const settings: Record<string, unknown> = {};
+    for (const key of Object.keys(raw)) {
+      if (settingKeyLookup.has(key as keyof KanbanSettings)) settings[key] = raw[key];
+    }
+
+    return settings as KanbanSettings;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+}
+
 export class SettingsManager {
   win: Window;
   app: App;
@@ -212,6 +238,33 @@ export class SettingsManager {
           'Set the default Kanban board settings. Settings can be overridden on a board-by-board basis.'
         ),
       });
+
+      new Setting(contentEl)
+        .setName(t('Import settings from Kanban'))
+        .setDesc(
+          t(
+            'Copy the global settings of the original Kanban plugin (obsidian-kanban) into this plugin. Current global settings are replaced.'
+          )
+        )
+        .addButton((button) =>
+          button.setButtonText(t('Import')).onClick(async () => {
+            const imported = await readOriginalPluginSettings(this.app);
+            if (!imported) {
+              new Notice(t('Settings of the original Kanban plugin were not found'));
+              return;
+            }
+
+            this.win.clearTimeout(this.applyDebounceTimer);
+            this.settings = imported;
+            this.config.onSettingsChange(imported);
+            new Notice(t('Settings imported'));
+
+            // Rebuild the UI so every control shows the imported values.
+            this.cleanUp();
+            contentEl.empty();
+            this.constructUI(contentEl, heading, local);
+          })
+        );
     }
 
     new Setting(contentEl)
