@@ -16,8 +16,11 @@ import {
 import { hydrateBoard, hydratePostOp } from './helpers/hydrateBoard';
 import { parseMarkdown } from './parseMarkdown';
 
+// Keys that only exist in the in-memory board, so they must survive re-parsing the file.
 const generatedKeys: Array<string | number> = [
   'id',
+  'forceEditMode',
+  'sorted',
   'date',
   'time',
   'unlockAt',
