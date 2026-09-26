@@ -12,7 +12,7 @@ function chain(...edges: Array<[string, string]>): BoardRelations {
   let rel: BoardRelations = {};
   for (const [blocked, blocker] of edges) {
     const res = addBlocker(rel, blocked, blocker);
-    if (!res.ok) throw new Error('unexpected failure ' + res.reason);
+    if (!res.ok) throw new Error('unexpected failure ' + JSON.stringify(res));
     rel = res.relations;
   }
   return rel;
@@ -65,8 +65,7 @@ describe('addBlocker', () => {
     // a blocked by b directly and through c
     const rel = chain(['a', 'b'], ['a', 'c'], ['c', 'b']);
     const res = addBlocker(rel, 'b', 'a');
-    expect(res.ok).toBe(false);
-    expect(!res.ok && res.reason).toBe('cycle');
+    expect(res).toMatchObject({ ok: false, reason: 'cycle' });
   });
 
   it('supports many-to-many relations', () => {

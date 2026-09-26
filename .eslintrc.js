@@ -5,7 +5,7 @@ module.exports = {
     node: true,
     jest: true,
   },
-  ignorePatterns: ['./src/docs'],
+  ignorePatterns: ['src/components/Editor/flatpickr/plugins/**'],
   extends: [
     'eslint:recommended',
     'plugin:react/recommended',
