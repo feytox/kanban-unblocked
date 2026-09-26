@@ -5,6 +5,7 @@ import { Board, DataTypes, DateColor, Item, Lane } from 'src/components/types';
 import { Path } from 'src/dnd/types';
 import { getEntityFromPath } from 'src/dnd/util/data';
 import { Op } from 'src/helpers/patch';
+import { t } from 'src/lang/helpers';
 
 import { getSearchValue } from '../common';
 
@@ -73,6 +74,20 @@ export function preprocessTitle(stateManager: StateManager, title: string) {
     }
   );
 
+  const unlockTrigger = stateManager.getSetting('unlock-trigger');
+  title = title.replace(
+    new RegExp(`(^|\\s)${escapeRegExpStr(unlockTrigger)}{([^}]+)}`, 'g'),
+    (match, space, content) => {
+      const parsed = parseUnlockDate(stateManager, content);
+      if (!parsed.isValid()) return match;
+      const hasTime = parsed.hours() !== 0 || parsed.minutes() !== 0;
+      const formatted = parsed.format(
+        hasTime ? `${dateDisplayFormat} ${timeFormat}` : dateDisplayFormat
+      );
+      return `${space}<span class="${c('preview-unlock')}">${t('Hidden until')} ${formatted}</span>`;
+    }
+  );
+
   title = title.replace(
     new RegExp(`(^|\\s)${escapeRegExpStr(timeTrigger)}{([^}]+)}`, 'g'),
     (match, space, content) => {
@@ -96,8 +111,34 @@ export function preprocessTitle(stateManager: StateManager, title: string) {
   return title;
 }
 
+/** Parses the value of a hide-until token: a date with an optional time. */
+export function parseUnlockDate(stateManager: StateManager, str: string) {
+  const dateFormat = stateManager.getSetting('date-format');
+  const timeFormat = stateManager.getSetting('time-format');
+
+  return moment(
+    str.trim(),
+    [
+      `${dateFormat} ${timeFormat}`,
+      `${dateFormat} HH:mm`,
+      dateFormat,
+      'YYYY-MM-DD HH:mm',
+      'YYYY-MM-DDTHH:mm',
+      'YYYY-MM-DD',
+    ],
+    true
+  );
+}
+
 export function hydrateItem(stateManager: StateManager, item: Item) {
-  const { dateStr, timeStr, fileAccessor } = item.data.metadata;
+  const { dateStr, timeStr, unlockStr, fileAccessor } = item.data.metadata;
+
+  // Generated values survive board diffs, so clear the ones whose source is gone.
+  const unlockAt = unlockStr ? parseUnlockDate(stateManager, unlockStr) : null;
+  if (unlockAt?.isValid()) item.data.metadata.unlockAt = unlockAt;
+  else delete item.data.metadata.unlockAt;
+  if (!dateStr) delete item.data.metadata.date;
+  if (!timeStr) delete item.data.metadata.time;
 
   if (dateStr) {
     item.data.metadata.date = moment(dateStr, stateManager.getSetting('date-format'));
@@ -154,13 +195,15 @@ export function hydrateBoard(stateManager: StateManager, board: Board): Board {
 function opAffectsHydration(op: Op) {
   return (
     (op.op === 'add' || op.op === 'replace') &&
-    ['title', 'titleRaw', 'dateStr', 'timeStr', /\d$/, /\/fileAccessor\/.+$/].some((postFix) => {
-      if (typeof postFix === 'string') {
-        return op.path.last().toString().endsWith(postFix);
-      } else {
-        return postFix.test(op.path.last().toString());
+    ['title', 'titleRaw', 'dateStr', 'timeStr', 'unlockStr', /\d$/, /\/fileAccessor\/.+$/].some(
+      (postFix) => {
+        if (typeof postFix === 'string') {
+          return op.path.last().toString().endsWith(postFix);
+        } else {
+          return postFix.test(op.path.last().toString());
+        }
       }
-    })
+    )
   );
 }
 

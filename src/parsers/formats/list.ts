@@ -157,6 +157,17 @@ export function listItemToItemData(stateManager: StateManager, md: string, item:
         return true;
       }
 
+      if (genericNode.type === 'unlock') {
+        itemData.metadata.unlockStr = (genericNode as DateNode).date;
+        if (moveDates) {
+          title = markRangeForDeletion(title, {
+            start: node.position.start.offset - itemBoundary.start,
+            end: node.position.end.offset - itemBoundary.start,
+          });
+        }
+        return true;
+      }
+
       if (genericNode.type === 'time') {
         itemData.metadata.timeStr = (genericNode as TimeNode).time;
         if (moveDates) {

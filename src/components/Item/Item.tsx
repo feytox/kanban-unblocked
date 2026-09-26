@@ -139,6 +139,11 @@ const ItemInner = memo(function ItemInner({
           editState={editState}
           isStatic={isStatic}
           inheritedDeadline={insight.inheritedDeadline}
+          hiddenUntil={
+            insight.reasons.includes('time-blocked')
+              ? item.data.metadata.unlockAt?.valueOf()
+              : undefined
+          }
         />
         {isBlocked && (
           <span

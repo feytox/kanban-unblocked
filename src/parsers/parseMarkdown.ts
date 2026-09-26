@@ -69,6 +69,7 @@ function getExtensions(stateManager: StateManager) {
     genericWrappedExtension('date', `${stateManager.getSetting('date-trigger')}{`, '}'),
     genericWrappedExtension('dateLink', `${stateManager.getSetting('date-trigger')}[[`, ']]'),
     genericWrappedExtension('time', `${stateManager.getSetting('time-trigger')}{`, '}'),
+    genericWrappedExtension('unlock', `${stateManager.getSetting('unlock-trigger')}{`, '}'),
     genericWrappedExtension('embedWikilink', '![[', ']]'),
     genericWrappedExtension('wikilink', '[[', ']]'),
     tagExtension(),
@@ -90,6 +91,10 @@ function getMdastExtensions(stateManager: StateManager) {
     genericWrappedFromMarkdown('time', (text, node) => {
       if (!text) return;
       node.time = text;
+    }),
+    genericWrappedFromMarkdown('unlock', (text, node) => {
+      if (!text) return;
+      node.date = text;
     }),
     genericWrappedFromMarkdown('embedWikilink', (text, node) => {
       if (!text) return;

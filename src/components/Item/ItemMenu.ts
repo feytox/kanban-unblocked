@@ -5,7 +5,7 @@ import { StateManager } from 'src/StateManager';
 import { Path } from 'src/dnd/types';
 import { moveEntity } from 'src/dnd/util/data';
 import { t } from 'src/lang/helpers';
-import { addRelationMenuItems } from 'src/relations/menu';
+import { addHideUntilMenuItems, addRelationMenuItems } from 'src/relations/menu';
 
 import { BoardModifiers } from '../../helpers/boardModifiers';
 import { applyTemplate, escapeRegExpStr, generateInstanceId } from '../helpers';
@@ -266,6 +266,15 @@ export function useItemMenu({
 
       menu.addSeparator();
       addRelationMenuItems(menu, stateManager, item);
+      addHideUntilMenuItems({
+        menu,
+        stateManager,
+        boardModifiers,
+        item,
+        path,
+        win: e.view,
+        coordinates,
+      });
       menu.addSeparator();
 
       const addMoveToOptions = (menu: Menu) => {

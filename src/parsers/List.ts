@@ -20,6 +20,7 @@ const generatedKeys: Array<string | number> = [
   'id',
   'date',
   'time',
+  'unlockAt',
   'titleSearch',
   'titleSearchRaw',
   'file',

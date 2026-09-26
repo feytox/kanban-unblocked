@@ -163,7 +163,8 @@
   }
 }
 
-.kanban-plugin__item-inherited-deadline {
+.kanban-plugin__item-inherited-deadline,
+.kanban-plugin__item-hidden-until {
   display: inline-flex;
   align-items: center;
   gap: var(--size-4-1);
@@ -173,11 +174,23 @@
 
   .kanban-plugin__icon {
     display: inline-flex;
-    color: var(--text-warning);
   }
 
   svg {
     width: var(--icon-xs);
     height: var(--icon-xs);
   }
+}
+
+.kanban-plugin__item-inherited-deadline .kanban-plugin__icon {
+  color: var(--text-warning);
+}
+
+.kanban-plugin__item-hidden-until .kanban-plugin__icon {
+  color: var(--text-faint);
+}
+
+.kanban-plugin__preview-unlock {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
 }

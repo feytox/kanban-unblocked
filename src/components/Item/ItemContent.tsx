@@ -20,6 +20,7 @@ import {
   MarkdownClonedPreviewRenderer,
   MarkdownRenderer,
 } from '../MarkdownRenderer/MarkdownRenderer';
+import { HiddenUntil } from '../Relations/HiddenUntil';
 import { InheritedDeadline } from '../Relations/InheritedDeadline';
 import { KanbanContext, SearchContext } from '../context';
 import { c, useGetDateColorFn, useGetTagColorFn } from '../helpers';
@@ -83,6 +84,7 @@ export interface ItemContentProps {
   searchQuery?: string;
   showMetadata?: boolean;
   inheritedDeadline?: CardInsight['inheritedDeadline'];
+  hiddenUntil?: number;
   editState: EditState;
   isStatic: boolean;
 }
@@ -190,6 +192,7 @@ export const ItemContent = memo(function ItemContent({
   searchQuery,
   showMetadata = true,
   inheritedDeadline,
+  hiddenUntil,
   isStatic,
 }: ItemContentProps) {
   const { stateManager, filePath, boardModifiers } = useContext(KanbanContext);
@@ -307,6 +310,7 @@ export const ItemContent = memo(function ItemContent({
             getDateColor={getDateColor}
           />
           <InheritedDeadline deadline={inheritedDeadline} />
+          <HiddenUntil until={hiddenUntil} />
           <InlineMetadata item={item} stateManager={stateManager} />
           <Tags tags={item.data.metadata.tags} searchQuery={searchQuery} />
         </div>
