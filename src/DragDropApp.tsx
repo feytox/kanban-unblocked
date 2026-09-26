@@ -18,9 +18,10 @@ import {
   removeEntity,
   updateEntity,
 } from './dnd/util/data';
-import { getBoardModifiers } from './helpers/boardModifiers';
+import { getBoardModifiers, withoutBlockId } from './helpers/boardModifiers';
 import KanbanPlugin from './main';
 import { frontmatterKey } from './parsers/common';
+import { getBoardBlockIds } from './parsers/formats/list';
 import {
   getTaskStatusDone,
   getTaskStatusPreDone,
@@ -203,6 +204,10 @@ export function DragDropApp({ win, plugin }: { win: Window; plugin: KanbanPlugin
           }
 
           const toInsert: Nestable[] = [];
+          // Relations don't travel between boards; only keep block ids that stay unique.
+          const takenBlockIds = getBoardBlockIds(destinationBoard);
+          const keepUniqueBlockId = (item: Item) =>
+            takenBlockIds.has(item.data.blockId) ? withoutBlockId(item) : item;
 
           if (entity.type === DataTypes.Item) {
             const { next, replacement } = maybeCompleteForMove(
@@ -215,9 +220,11 @@ export function DragDropApp({ win, plugin }: { win: Window; plugin: KanbanPlugin
               entity
             );
             replacementEntity = replacement;
-            toInsert.push(next);
+            toInsert.push(keepUniqueBlockId(next));
           } else {
-            toInsert.push(entity);
+            toInsert.push(
+              update(entity, { children: { $set: entity.children.map(keepUniqueBlockId) } })
+            );
           }
 
           if (entity.type === DataTypes.Lane) {

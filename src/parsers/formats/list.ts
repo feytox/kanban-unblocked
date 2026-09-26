@@ -18,6 +18,9 @@ import {
 import { laneTitleWithMaxItems } from 'src/helpers';
 import { defaultSort } from 'src/helpers/util';
 import { t } from 'src/lang/helpers';
+import { prune } from 'src/relations/graph';
+import { relationsToCodeblock } from 'src/relations/serialize';
+import { BoardRelations } from 'src/relations/types';
 import { visit } from 'unist-util-visit';
 
 import { archiveString, completeString, settingsToCodeblock } from '../common';
@@ -237,10 +240,49 @@ function isArchiveLane(child: Content, children: Content[], currentIndex: number
   return prev && prev.type === 'thematicBreak';
 }
 
+/**
+ * Block ids identify cards in relations, so they must be unique. The first card keeps a duplicated
+ * id (and its relations); later ones get a fresh id that is written back on the next save.
+ */
+function ensureUniqueBlockIds(lanes: Lane[], archive: Item[]) {
+  const seen = new Set<string>();
+  const duplicates: Item[] = [];
+
+  const visit = (item: Item) => {
+    const { blockId } = item.data;
+    if (!blockId) return;
+    if (seen.has(blockId)) duplicates.push(item);
+    else seen.add(blockId);
+  };
+
+  lanes.forEach((lane) => lane.children.forEach(visit));
+  archive.forEach(visit);
+
+  for (const item of duplicates) {
+    item.data.blockId = generateUniqueBlockId(seen);
+    seen.add(item.data.blockId);
+  }
+}
+
+export function generateUniqueBlockId(taken: { has(id: string): boolean }) {
+  let id = generateInstanceId(6);
+  while (id.length < 6 || taken.has(id)) id = generateInstanceId(6);
+  return id;
+}
+
+export function getBoardBlockIds(board: Board) {
+  const ids = new Set<string>();
+  const add = (item: Item) => item.data.blockId && ids.add(item.data.blockId);
+  board.children.forEach((lane) => lane.children.forEach(add));
+  board.data.archive.forEach(add);
+  return ids;
+}
+
 export function astToUnhydratedBoard(
   stateManager: StateManager,
   settings: KanbanSettings,
   frontmatter: Record<string, any>,
+  relations: BoardRelations,
   root: Root,
   md: string
 ): Board {
@@ -260,7 +302,7 @@ export function astToUnhydratedBoard(
         if (child.type === 'paragraph') {
           const childStr = toString(child);
 
-          if (childStr.startsWith('%% kanban:settings')) {
+          if (childStr.startsWith('%% kanban:')) {
             return false;
           }
 
@@ -318,6 +360,8 @@ export function astToUnhydratedBoard(
     }
   });
 
+  ensureUniqueBlockIds(lanes, archive);
+
   return {
     ...BoardTemplate,
     id: stateManager.file.path,
@@ -326,6 +370,7 @@ export function astToUnhydratedBoard(
       settings,
       frontmatter,
       archive,
+      relations,
       isSearching: false,
       errors: [],
     },
@@ -447,5 +492,14 @@ export function boardToMd(board: Board) {
 
   const frontmatter = ['---', '', stringifyYaml(board.data.frontmatter), '---', '', ''].join('\n');
 
-  return frontmatter + lanes + archiveToMd(board.data.archive) + settingsToCodeblock(board);
+  const blockIds = getBoardBlockIds(board);
+  const relations = prune(board.data.relations ?? {}, (id) => blockIds.has(id));
+
+  return (
+    frontmatter +
+    lanes +
+    archiveToMd(board.data.archive) +
+    relationsToCodeblock(relations) +
+    settingsToCodeblock(board)
+  );
 }

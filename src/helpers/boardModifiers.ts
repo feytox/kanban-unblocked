@@ -36,6 +36,11 @@ export interface BoardModifiers {
   duplicateEntity: (path: Path) => void;
 }
 
+export function withoutBlockId(item: Item): Item {
+  if (!item.data.blockId) return item;
+  return update(item, { data: { $unset: ['blockId'] } });
+}
+
 export function getBoardModifiers(view: KanbanView, stateManager: StateManager): BoardModifiers {
   const appendArchiveDate = (item: Item) => {
     const archiveDateFormat = stateManager.getSetting('archive-date-format');
@@ -253,9 +258,22 @@ export function getBoardModifiers(view: KanbanView, stateManager: StateManager):
     duplicateEntity: (path: Path) => {
       stateManager.setState((boardData) => {
         const entity = getEntityFromPath(boardData, path);
+
+        if (entity.type === DataTypes.Item) {
+          // A copy is a new card: it must not share the block id (and relations) of the original.
+          return insertEntity(boardData, path, [
+            update(withoutBlockId(entity), { id: { $set: generateInstanceId() } }),
+          ]);
+        }
+
         const entityWithNewID = update(entity, {
           id: {
             $set: generateInstanceId(),
+          },
+          children: {
+            $set: entity.children.map((item: Item) =>
+              update(withoutBlockId(item), { id: { $set: generateInstanceId() } })
+            ),
           },
         });
 

@@ -310,6 +310,7 @@ export class StateManager {
       children: [],
       data: {
         archive: [],
+        relations: {},
         settings: { [frontmatterKey]: 'board' },
         frontmatter: {},
         isSearching: false,

@@ -5,6 +5,7 @@ import { parseYaml } from 'obsidian';
 import { KanbanSettings, settingKeyLookup } from 'src/Settings';
 import { StateManager } from 'src/StateManager';
 import { getNormalizedPath } from 'src/helpers/renderMarkdown';
+import { extractRelations } from 'src/relations/serialize';
 
 import { frontmatterKey, getLinkedPageMetadata } from './common';
 import { blockidExtension, blockidFromMarkdown } from './extensions/blockid';
@@ -164,7 +165,9 @@ function getMdastExtensions(stateManager: StateManager) {
   ];
 }
 
-export function parseMarkdown(stateManager: StateManager, md: string) {
+export function parseMarkdown(stateManager: StateManager, fileMd: string) {
+  // The relations block is removed up front so the rest of the parser never sees it.
+  const { relations, md } = extractRelations(fileMd);
   const mdFrontmatter = extractFrontmatter(md);
   const mdSettings = extractSettingsFooter(md);
   const settings = { ...mdSettings };
@@ -185,6 +188,8 @@ export function parseMarkdown(stateManager: StateManager, md: string) {
   stateManager.compileSettings(settings);
 
   return {
+    md,
+    relations,
     settings,
     frontmatter: fileFrontmatter,
     ast: fromMarkdown(md, {

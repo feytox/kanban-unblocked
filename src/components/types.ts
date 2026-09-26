@@ -3,6 +3,7 @@ import { KanbanSettings } from 'src/Settings';
 import { Nestable } from 'src/dnd/types';
 import { InlineField } from 'src/parsers/helpers/inlineMetadata';
 import { FileAccessor } from 'src/parsers/helpers/parser';
+import { BoardRelations } from 'src/relations/types';
 
 export enum LaneSort {
   TitleAsc,
@@ -69,6 +70,8 @@ export interface ItemMetadata {
   date?: moment.Moment;
   timeStr?: string;
   time?: moment.Moment;
+  unlockStr?: string;
+  unlockAt?: moment.Moment;
   tags?: string[];
   fileAccessor?: FileAccessor;
   file?: TFile | null;
@@ -99,6 +102,7 @@ export interface BoardData {
   settings: KanbanSettings;
   frontmatter: Record<string, number | string | Array<number | string>>;
   archive: Item[];
+  relations: BoardRelations;
   errors: ErrorReport[];
 }
 
