@@ -6,13 +6,14 @@ Boards stay plain Markdown and remain compatible with the original plugin. On to
 
 ## What's new
 
-- **Blocking relations.** Mark a card as blocked by one or more other cards (right-click a card → _Add blocker…_ / _Blocks…_). A card can block many cards, and many cards can block one.
-  - Blocked cards are dimmed and get a small lock icon. A card stops being blocked once all its blockers are done or archived.
-  - Hover a card, or grab it, to see arrows to every card it's connected to, directly or through other cards.
-  - Toggle the header button (or the _Show relations on cards_ board setting) to list blockers on the cards themselves.
-  - Cycles can't happen. Linking two cards the other way round just flips the relation. A link that would close a longer cycle is refused.
-- **Effective deadlines.** If a card blocks something that's due earlier than the card itself, the card shows that earlier date too (the card's own date isn't changed).
-- **Time-blocking.** Add `@>{2026-10-01}` or `@>{2026-10-01 18:00}` to a card (or right-click → _Hide until…_). The card stays dimmed until that moment, which suits recurring tasks that wait in a "reload" list.
+- **Blocking relations.** Right-click a card and pick _Add blocker..._ or _Blocks..._. One card can block several cards, and several cards can block one. _Remove relation..._ deletes a link.
+  - Blocked cards are dimmed and get a small lock icon. A card stops being blocked once all its blockers are done, cancelled or archived.
+  - Hover a card (or start dragging it) to see arrows to every card it depends on or that depends on it, directly or through other cards.
+  - The header button (or the pane menu on mobile) shows or hides the _Blocked by / Blocks_ list on each card. The setting is saved per board.
+  - Cycles can't happen. If you link two cards the other way round, the relation just flips. A link that would close a longer cycle is refused, and a notice shows the cycle.
+- **Effective deadlines.** A card that blocks something due earlier than itself shows _Needed by &lt;date&gt;_. The card's own date isn't changed.
+- **Time-blocking.** Add `@>{2026-10-01}` or `@>{2026-10-01 18:00}` to a card, or right-click it and pick _Hide until..._. The card stays dimmed until that moment and becomes normal on its own, no reload needed. This suits recurring tasks that wait in a "reload" list. _Show now_ removes the token. The trigger can be changed in the settings.
+- Existing boards keep working as before. Relations and hide-until tokens are the only additions to the file format.
 
 ### How relations are stored
 
