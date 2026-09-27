@@ -97,29 +97,6 @@ export function useSettingsMenu({ setEditState, path, lane }: UseSettingsMenuPar
       })
       .addItem((item) => {
         item
-          .setIcon('lucide-check-square')
-          .setTitle(t('Mark cards in this list as complete'))
-          .setChecked(!!lane.data.shouldMarkItemsComplete)
-          .onClick(() =>
-            boardModifiers.setLaneFlag(
-              path,
-              'shouldMarkItemsComplete',
-              !lane.data.shouldMarkItemsComplete
-            )
-          );
-      })
-      .addItem((item) => {
-        item
-          .setIcon('lucide-unlock')
-          .setTitle(t("Cards in this list don't block other cards"))
-          .setChecked(!!lane.data.resolvesBlockers)
-          .onClick(() =>
-            boardModifiers.setLaneFlag(path, 'resolvesBlockers', !lane.data.resolvesBlockers)
-          );
-      })
-      .addSeparator()
-      .addItem((item) => {
-        item
           .setIcon('lucide-archive')
           .setTitle(t('Archive cards'))
           .onClick(() => setConfirmAction('archive-items'));

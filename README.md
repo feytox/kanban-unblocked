@@ -7,7 +7,7 @@ Boards stay plain Markdown and remain compatible with the original plugin. On to
 ## What's new
 
 - **Blocking relations.** Hover a card and drag the small circle on its right edge onto another card: the first card now blocks the second (press Esc to cancel). You can also right-click a card and pick _Add blocker..._ or _Blocks..._. One card can block several cards, and several cards can block one. _Remove relation..._ deletes a link.
-  - A blocker is resolved when it's done, cancelled or archived, or when it sits in a list marked _Cards in this list don't block other cards_ (in the list's ⋯ menu). This suits lists like "Review". Moving the card out of that list makes it block again.
+  - A blocker is resolved when it's done, cancelled or archived, or when it sits in a list marked _Cards in this list don't block other cards_ (in the list's edit mode). This suits lists like "Review". Moving the card out of that list makes it block again.
   - Blocked cards are dimmed and get a small lock icon. A card stops being blocked once all its blockers are done, cancelled or archived.
   - Hover a card (or start dragging it) to see arrows to every card it depends on or that depends on it, directly or through other cards.
   - The header button (or the pane menu on mobile) shows or hides the _Blocked by / Blocks_ list on each card. The setting is saved per board.

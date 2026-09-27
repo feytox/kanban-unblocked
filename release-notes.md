@@ -9,5 +9,5 @@ First release of Kanban: Unblocked, a fork of Obsidian Kanban 2.0.51.
 - Time-blocking with `@>{date}` or `@>{date time}` and a "Hide until..." menu item
 - Fixed: duplicated cards and lanes no longer share block ids
 - Fixed: removing dates or other metadata from a board file outside Kanban is now picked up
-- Fixed: turning on "Mark cards in this list as complete" now completes the cards already in the list; the toggle is also in the list's menu
+- Fixed: turning on "Mark cards in this list as complete" now completes the cards already in the list
 - Fixed: moving a card into a complete list with the Tasks plugin enabled no longer drops its block id
