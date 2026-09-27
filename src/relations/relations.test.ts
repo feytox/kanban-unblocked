@@ -289,10 +289,13 @@ describe('availability', () => {
     expect(evaluateAvailability(subject, { now: 100, index: idx }).reasons).toEqual([]);
   });
 
-  it('never dims resolved cards', () => {
+  it('keeps the time-block of resolved cards but not their blockers', () => {
     expect(
       evaluateAvailability({ blockId: 'a', resolved: true, unlockAt: 100 }, { now: 0, index: idx })
-    ).toEqual({ reasons: [] });
+    ).toEqual({ reasons: ['time-blocked'], nextChangeAt: 100 });
+    expect(
+      evaluateAvailability({ blockId: 'a', resolved: true }, { now: 0, index: idx }).reasons
+    ).toEqual([]);
   });
 });
 
@@ -350,6 +353,19 @@ describe('buildInsights', () => {
     expect(insights.cards.get('a').reasons).toEqual([]);
     expect(insights.cards.get('a').blockers[0].resolved).toBe(true);
     expect(insights.cards.has('b')).toBe(false);
+  });
+
+  it('lets resolved blockers keep their relations and their own time-block', () => {
+    const cards = [card('a'), card('b', { resolved: true, unlockAt: 50 })];
+    const insights = buildInsights(cards, chain(['a', 'b']), 0);
+    expect(insights.cards.get('a').reasons).toEqual([]);
+    expect(insights.cards.get('a').blockers.map((c) => c.key)).toEqual(['b']);
+    expect(insights.cards.get('b').reasons).toEqual(['time-blocked']);
+    expect(insights.cards.get('b').dependents.map((c) => c.key)).toEqual(['a']);
+
+    // Moving the blocker back to a regular list makes it block again.
+    cards[1] = card('b');
+    expect(buildInsights(cards, chain(['a', 'b']), 0).cards.get('a').reasons).toEqual(['blocked']);
   });
 
   it('gives relations only to the first owner of a duplicated block id', () => {

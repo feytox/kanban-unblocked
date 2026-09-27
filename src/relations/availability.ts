@@ -35,6 +35,8 @@ export interface AvailabilityRule {
 export const blockerRule: AvailabilityRule = {
   reason: 'blocked',
   evaluate(subject, { index }) {
+    // A finished card (or one in a list that resolves blockers) has nothing left to wait for.
+    if (subject.resolved) return { unavailable: false };
     return { unavailable: !!subject.blockId && index.isBlocked(subject.blockId) };
   },
 };
@@ -61,9 +63,6 @@ export function evaluateAvailability(
   ctx: AvailabilityContext,
   rules: readonly AvailabilityRule[] = availabilityRules
 ): Availability {
-  // Finished cards are never dimmed: there's nothing left to wait for.
-  if (subject.resolved) return { reasons: [] };
-
   const reasons: UnavailableReason[] = [];
   let nextChangeAt: number | undefined;
 
