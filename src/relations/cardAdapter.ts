@@ -5,9 +5,14 @@ import { CardAdapter } from './RelationStore';
 
 const cancelledChar = '-';
 
-export function isItemResolved(item: Item, laneMarksComplete: boolean) {
+export function isItemResolved(
+  item: Item,
+  laneMarksComplete: boolean,
+  checkboxesShown: boolean = true
+) {
   if (laneMarksComplete) return true;
-  if (!item.data.checked) return false;
+  // A hidden checkbox can't be seen or toggled, so it must not silently resolve the card.
+  if (!checkboxesShown || !item.data.checked) return false;
 
   const { checkChar } = item.data;
   return (
@@ -33,7 +38,10 @@ export function getItemPlainTitle(item: Item) {
   return title || firstLine.trim() || '…';
 }
 
-export const itemCardAdapter: CardAdapter = {
-  isResolved: isItemResolved,
-  getTitle: getItemPlainTitle,
-};
+export function createItemCardAdapter(getCheckboxesShown: () => boolean): CardAdapter {
+  return {
+    isResolved: (item, laneMarksComplete) =>
+      isItemResolved(item, laneMarksComplete, getCheckboxesShown()),
+    getTitle: getItemPlainTitle,
+  };
+}

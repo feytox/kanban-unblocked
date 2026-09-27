@@ -10,7 +10,7 @@ import { ListFormat } from './parsers/List';
 import { BaseFormat, frontmatterKey, shouldRefreshBoard } from './parsers/common';
 import { getTaskStatusDone } from './parsers/helpers/inlineMetadata';
 import { RelationStore } from './relations/RelationStore';
-import { itemCardAdapter } from './relations/cardAdapter';
+import { createItemCardAdapter } from './relations/cardAdapter';
 import {
   defaultDateTrigger,
   defaultMetadataPosition,
@@ -33,9 +33,10 @@ export class StateManager {
   file: TFile;
 
   parser: BaseFormat;
-  relations: RelationStore = new RelationStore(itemCardAdapter, () => {
-    return this.getAView()?.getWindow() ?? window;
-  });
+  relations: RelationStore = new RelationStore(
+    createItemCardAdapter(() => !!this.getSetting('show-checkboxes')),
+    () => this.getAView()?.getWindow() ?? window
+  );
 
   constructor(
     app: App,
