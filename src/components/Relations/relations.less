@@ -253,3 +253,28 @@
     transition: none;
   }
 }
+
+.kanban-plugin__item-hidden-until.is-clickable {
+  cursor: pointer;
+
+  &:hover {
+    color: var(--text-normal);
+  }
+}
+
+// Only shown while hovering the card, so it stays out of the way.
+.kanban-plugin__item-hide-until-button {
+  display: flex;
+  flex-shrink: 0;
+  align-self: flex-start;
+  padding: 4px;
+  color: var(--text-faint);
+  --icon-size: var(--icon-xs);
+  opacity: 0;
+  transition: 100ms opacity;
+
+  .kanban-plugin__item:hover &,
+  &:focus-visible {
+    opacity: 1;
+  }
+}

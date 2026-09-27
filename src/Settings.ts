@@ -83,6 +83,8 @@ export interface KanbanSettings {
   'show-archive-all'?: boolean;
   'show-board-settings'?: boolean;
   'show-checkboxes'?: boolean;
+  'show-hidden-until'?: boolean;
+  'show-hide-until-button'?: boolean;
   'show-relations'?: boolean;
   'show-relations-button'?: boolean;
   'show-relative-date'?: boolean;
@@ -134,6 +136,8 @@ export const settingKeyLookup: Set<keyof KanbanSettings> = new Set([
   'show-archive-all',
   'show-board-settings',
   'show-checkboxes',
+  'show-hidden-until',
+  'show-hide-until-button',
   'show-relations',
   'show-relations-button',
   'show-relative-date',
@@ -1390,6 +1394,22 @@ export class SettingsManager {
           }
         });
       });
+
+    this.addToggleSetting(contentEl, local, {
+      key: 'show-hidden-until',
+      name: t('Show when hidden cards unlock'),
+      desc: t(
+        'When toggled, hidden cards show the date they unlock. Click it to pick another date.'
+      ),
+      defaultValue: true,
+    });
+
+    this.addToggleSetting(contentEl, local, {
+      key: 'show-hide-until-button',
+      name: t('Show hide-until button on cards'),
+      desc: t('When toggled, hovering a card shows a button that hides it until a chosen date.'),
+      defaultValue: true,
+    });
 
     contentEl.createEl('h4', { text: t('Board Header Buttons') });
 

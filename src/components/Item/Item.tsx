@@ -16,6 +16,7 @@ import { t } from 'src/lang/helpers';
 import { frontmatterKey } from 'src/parsers/common';
 import { useCardInsight } from 'src/relations/RelationStore';
 import { CardInsight } from 'src/relations/insights';
+import { pickHideUntilDate } from 'src/relations/menu';
 
 import { Icon } from '../Icon/Icon';
 import { RelationChips } from '../Relations/RelationChips';
@@ -78,6 +79,22 @@ const ItemInner = memo(function ItemInner({
   }, [item.data.forceEditMode]);
 
   const path = useNestedEntityPath();
+
+  const showHideUntilButton = stateManager.useSetting('show-hide-until-button');
+  const pickHideUntil = useCallback(
+    (e: MouseEvent) => {
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      pickHideUntilDate({
+        stateManager,
+        boardModifiers,
+        item,
+        path,
+        win: e.view,
+        coordinates: { x: rect.left, y: rect.bottom },
+      });
+    },
+    [stateManager, boardModifiers, item, path]
+  );
 
   const showItemMenu = useItemMenu({
     boardModifiers,
@@ -144,6 +161,7 @@ const ItemInner = memo(function ItemInner({
               ? item.data.metadata.unlockAt?.valueOf()
               : undefined
           }
+          onHiddenUntilClick={isStatic ? undefined : pickHideUntil}
         />
         {isBlocked && (
           <span
@@ -155,6 +173,17 @@ const ItemInner = memo(function ItemInner({
           >
             <Icon name="lucide-lock" />
           </span>
+        )}
+        {showHideUntilButton && !isStatic && !isEditing(editState) && (
+          <a
+            data-ignore-drag={true}
+            onPointerDown={(e) => e.preventDefault()}
+            onClick={pickHideUntil}
+            className={`${c('item-hide-until-button')} clickable-icon`}
+            aria-label={t('Hide until...')}
+          >
+            <Icon name="lucide-hourglass" />
+          </a>
         )}
         <ItemMenuButton editState={editState} setEditState={setEditState} showMenu={showItemMenu} />
       </div>

@@ -252,6 +252,12 @@ const lang: Partial<Lang> = {
   'Hide until...': 'Скрыть до...',
   'Show now': 'Показать сейчас',
   'Hidden until': 'Скрыта до',
+  'Show when hidden cards unlock': 'Показывать, когда скрытые карточки откроются',
+  'When toggled, hidden cards show the date they unlock. Click it to pick another date.':
+    'Скрытые карточки показывают дату, когда они откроются. Нажмите на неё, чтобы выбрать другую дату.',
+  'Show hide-until button on cards': 'Кнопка «Скрыть до» на карточках',
+  'When toggled, hovering a card shows a button that hides it until a chosen date.':
+    'При наведении на карточку появляется кнопка, которая скрывает её до выбранной даты.',
 };
 
 export default lang;

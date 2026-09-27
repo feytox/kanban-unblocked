@@ -88,61 +88,70 @@ export function addRelationMenuItems(menu: Menu, stateManager: StateManager, ite
   });
 }
 
-interface HideUntilMenuParams {
-  menu: Menu;
+interface HideUntilParams {
   stateManager: StateManager;
   boardModifiers: BoardModifiers;
   item: Item;
   path: Path;
-  win: Window;
-  coordinates: { x: number; y: number };
 }
 
-export function addHideUntilMenuItems({
-  menu,
-  stateManager,
-  boardModifiers,
-  item,
-  path,
-  win,
-  coordinates,
-}: HideUntilMenuParams) {
+function hideUntilTokenRegEx(stateManager: StateManager) {
   const trigger = stateManager.getSetting('unlock-trigger');
-  const tokenRegEx = new RegExp(`(^|\\s)${escapeRegExpStr(trigger)}{[^}]*}`);
-  const hasToken = !!item.data.metadata.unlockStr;
+  return new RegExp(`(^|\\s)${escapeRegExpStr(trigger)}{[^}]*}`);
+}
 
-  const setTitle = (titleRaw: string) => {
-    boardModifiers.updateItem(path, stateManager.updateItemContent(item, titleRaw));
-  };
+function setItemTitle(
+  { stateManager, boardModifiers, item, path }: HideUntilParams,
+  titleRaw: string
+) {
+  boardModifiers.updateItem(path, stateManager.updateItemContent(item, titleRaw));
+}
+
+/** Opens a date picker at `coordinates` and hides the card until the chosen date. */
+export function pickHideUntilDate(
+  params: HideUntilParams & { win: Window; coordinates: { x: number; y: number } }
+) {
+  const { stateManager, item, win, coordinates } = params;
+  const trigger = stateManager.getSetting('unlock-trigger');
+  const current = item.data.metadata.unlockAt;
+  const initial = current?.isValid() ? current : moment().add(1, 'day').startOf('day');
+
+  constructDatePicker(
+    win,
+    stateManager,
+    coordinates,
+    (dates) => {
+      const token = `${trigger}{${moment(dates[0]).format(stateManager.getSetting('date-format'))}}`;
+      const titleRaw = item.data.metadata.unlockStr
+        ? item.data.titleRaw.replace(hideUntilTokenRegEx(stateManager), `$1${token}`)
+        : `${item.data.titleRaw} ${token}`;
+      setItemTitle(params, titleRaw);
+    },
+    initial.toDate()
+  );
+}
+
+export function addHideUntilMenuItems(
+  params: HideUntilParams & { menu: Menu; win: Window; coordinates: { x: number; y: number } }
+) {
+  const { menu, stateManager, item } = params;
 
   menu.addItem((i) => {
     i.setIcon('lucide-hourglass')
       .setTitle(t('Hide until...'))
-      .onClick(() => {
-        const current = item.data.metadata.unlockAt;
-        const initial = current?.isValid() ? current : moment().add(1, 'day').startOf('day');
-
-        constructDatePicker(
-          win,
-          stateManager,
-          coordinates,
-          (dates) => {
-            const token = `${trigger}{${moment(dates[0]).format(stateManager.getSetting('date-format'))}}`;
-            const titleRaw = hasToken
-              ? item.data.titleRaw.replace(tokenRegEx, `$1${token}`)
-              : `${item.data.titleRaw} ${token}`;
-            setTitle(titleRaw);
-          },
-          initial.toDate()
-        );
-      });
+      .onClick(() => pickHideUntilDate(params));
   });
 
-  if (hasToken) {
+  if (item.data.metadata.unlockStr) {
     menu.addItem((i) => {
       i.setIcon('lucide-eye')
         .setTitle(t('Show now'))
-        .onClick(() => setTitle(item.data.titleRaw.replace(tokenRegEx, '').trim()));
+        .onClick(() =>
+          setItemTitle(
+            params,
+            item.data.titleRaw.replace(hideUntilTokenRegEx(stateManager), '').trim()
+          )
+        );
     });
   }
 }

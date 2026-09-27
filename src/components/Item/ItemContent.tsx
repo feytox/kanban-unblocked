@@ -85,6 +85,7 @@ export interface ItemContentProps {
   showMetadata?: boolean;
   inheritedDeadline?: CardInsight['inheritedDeadline'];
   hiddenUntil?: number;
+  onHiddenUntilClick?: (e: MouseEvent) => void;
   editState: EditState;
   isStatic: boolean;
 }
@@ -193,6 +194,7 @@ export const ItemContent = memo(function ItemContent({
   showMetadata = true,
   inheritedDeadline,
   hiddenUntil,
+  onHiddenUntilClick,
   isStatic,
 }: ItemContentProps) {
   const { stateManager, filePath, boardModifiers } = useContext(KanbanContext);
@@ -310,7 +312,7 @@ export const ItemContent = memo(function ItemContent({
             getDateColor={getDateColor}
           />
           <InheritedDeadline deadline={inheritedDeadline} />
-          <HiddenUntil until={hiddenUntil} />
+          <HiddenUntil until={hiddenUntil} onClick={onHiddenUntilClick} />
           <InlineMetadata item={item} stateManager={stateManager} />
           <Tags tags={item.data.metadata.tags} searchQuery={searchQuery} />
         </div>

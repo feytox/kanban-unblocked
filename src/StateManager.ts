@@ -270,6 +270,9 @@ export class StateManager {
       'show-search': this.getSettingRaw('show-search', suppliedSettings) ?? true,
       'show-set-view': this.getSettingRaw('show-set-view', suppliedSettings) ?? true,
       'show-relations': this.getSettingRaw('show-relations', suppliedSettings) ?? false,
+      'show-hidden-until': this.getSettingRaw('show-hidden-until', suppliedSettings) ?? true,
+      'show-hide-until-button':
+        this.getSettingRaw('show-hide-until-button', suppliedSettings) ?? true,
       'show-relations-button':
         this.getSettingRaw('show-relations-button', suppliedSettings) ?? true,
       'tag-colors': this.getSettingRaw('tag-colors', suppliedSettings) ?? [],

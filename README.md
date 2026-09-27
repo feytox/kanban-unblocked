@@ -13,7 +13,7 @@ Boards stay plain Markdown and remain compatible with the original plugin. On to
   - The header button (or the pane menu on mobile) shows or hides the _Blocked by / Blocks_ list on each card. The setting is saved per board.
   - Cycles can't happen. If you link two cards the other way round, the relation just flips. A link that would close a longer cycle is refused, and a notice shows the cycle.
 - **Effective deadlines.** A card that blocks something due earlier than itself shows _Needed by &lt;date&gt;_. The card's own date isn't changed.
-- **Time-blocking.** Add `@>{2026-10-01}` or `@>{2026-10-01 18:00}` to a card, or right-click it and pick _Hide until..._. The card stays dimmed until that moment and becomes normal on its own, no reload needed. This suits recurring tasks that wait in a "reload" list. _Show now_ removes the token. The trigger can be changed in the settings.
+- **Time-blocking.** Add `@>{2026-10-01}` or `@>{2026-10-01 18:00}` to a card, or right-click it and pick _Hide until..._. The card stays dimmed until that moment and becomes normal on its own, no reload needed. This suits recurring tasks that wait in a "reload" list. _Show now_ removes the token. The trigger can be changed in the settings. A hidden card shows _Hidden until …_; click it to pick another date. Hovering a card also shows an hourglass button that hides it until a chosen date. Both can be turned off in the settings.
 - **Settings import.** _Settings → Kanban: Unblocked → Import settings from Kanban_ copies the original plugin's global settings.
 - Existing boards keep working as before. Relations and hide-until tokens are the only additions to the file format.
 
