@@ -1,5 +1,1 @@
-- Click "Hidden until …" on a card to pick another date
-- Optional hourglass button on cards (shown on hover) to hide a card until a date
-- New settings to hide the "Hidden until …" label and the hourglass button
-- Fixed: cards in "complete" and "don't block other cards" lists keep their time-block
-- The list-flag toggles moved out of the list's ⋯ menu; use the list's edit mode instead
+- Fixed: when checkboxes are hidden on a board, a checked card no longer counts as done. Hidden checkboxes used to make relations look inactive (faint dashed arrows, blocked cards not dimmed)
