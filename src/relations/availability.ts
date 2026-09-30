@@ -76,3 +76,22 @@ export function evaluateAvailability(
 
   return { reasons, nextChangeAt };
 }
+
+export interface AvailabilitySortKey {
+  reasons: readonly UnavailableReason[];
+  unlockAt?: number;
+}
+
+function availabilityRank(reasons: readonly UnavailableReason[]): number {
+  if (!reasons.length) return 0;
+  // Time-blocks end on a known date, blockers don't, so blocked cards go last.
+  return reasons.includes('blocked') ? 2 : 1;
+}
+
+/** Orders available cards first, then time-blocked ones by unlock time, then blocked ones. */
+export function compareAvailability(a: AvailabilitySortKey, b: AvailabilitySortKey): number {
+  const rank = availabilityRank(a.reasons) - availabilityRank(b.reasons);
+  if (rank !== 0) return rank;
+  if (!a.reasons.length) return 0;
+  return (a.unlockAt ?? Infinity) - (b.unlockAt ?? Infinity) || 0;
+}

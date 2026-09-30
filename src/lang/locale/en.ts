@@ -311,6 +311,7 @@ const en = {
   'Show when hidden cards unlock': 'Show when hidden cards unlock',
   'When toggled, hidden cards show the date they unlock. Click it to pick another date.':
     'When toggled, hidden cards show the date they unlock. Click it to pick another date.',
+  'Sort by blocks': 'Sort by blocks',
   'Show hide-until button on cards': 'Show hide-until button on cards',
   'When toggled, hovering a card shows a button that hides it until a chosen date.':
     'When toggled, hovering a card shows a button that hides it until a chosen date.',

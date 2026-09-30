@@ -5,6 +5,7 @@ import { Path } from 'src/dnd/types';
 import { defaultSort } from 'src/helpers/util';
 import { t } from 'src/lang/helpers';
 import { lableToName } from 'src/parsers/helpers/inlineMetadata';
+import { compareAvailability } from 'src/relations/availability';
 
 import { anyToString } from '../Item/MetadataTable';
 import { KanbanContext } from '../context';
@@ -326,6 +327,41 @@ export function useSettingsMenu({ setEditState, path, lane }: UseSettingsMenuPar
           });
         });
       }
+
+      menu.addItem((item) => {
+        item
+          .setIcon('arrow-down-up')
+          .setTitle(t('Sort by blocks'))
+          .onClick(() => {
+            // Always puts available cards on top, so there is no direction to toggle.
+            stateManager.relations.refresh();
+
+            const keys = new Map(
+              lane.children.map((child) => [
+                child,
+                {
+                  reasons: stateManager.relations.getCardInsight(child.id).reasons,
+                  unlockAt: child.data.metadata.unlockAt?.valueOf(),
+                },
+              ])
+            );
+            const children = lane.children.slice();
+
+            children.sort((a, b) => compareAvailability(keys.get(a), keys.get(b)));
+
+            boardModifiers.updateLane(
+              path,
+              update(lane, {
+                children: {
+                  $set: children,
+                },
+                data: {
+                  $unset: ['sorted'],
+                },
+              })
+            );
+          });
+      });
     };
 
     if (Platform.isPhone) {

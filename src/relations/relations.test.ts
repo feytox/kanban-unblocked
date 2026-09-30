@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { RelationIndex, RelationNode } from './RelationIndex';
-import { evaluateAvailability } from './availability';
+import { compareAvailability, evaluateAvailability } from './availability';
 import { addBlocker, findBlockerPath, prune, removeBlocker, removeCardRelations } from './graph';
 import { CardInfo, buildInsights } from './insights';
 import { extractRelations, relationsToCodeblock } from './serialize';
@@ -296,6 +296,28 @@ describe('availability', () => {
     expect(
       evaluateAvailability({ blockId: 'a', resolved: true }, { now: 0, index: idx }).reasons
     ).toEqual([]);
+  });
+});
+
+describe('compareAvailability', () => {
+  it('puts available cards first, then time-blocked by unlock time, then blocked', () => {
+    const cards = [
+      { id: 'blocked', reasons: ['blocked' as const] },
+      { id: 'late', reasons: ['time-blocked' as const], unlockAt: 200 },
+      { id: 'free1', reasons: [], unlockAt: 50 },
+      { id: 'both', reasons: ['blocked' as const, 'time-blocked' as const], unlockAt: 100 },
+      { id: 'soon', reasons: ['time-blocked' as const], unlockAt: 150 },
+      { id: 'free2', reasons: [] },
+    ];
+
+    expect(cards.sort(compareAvailability).map((card) => card.id)).toEqual([
+      'free1',
+      'free2',
+      'soon',
+      'late',
+      'both',
+      'blocked',
+    ]);
   });
 });
 
