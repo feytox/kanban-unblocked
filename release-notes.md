@@ -1,1 +1,1 @@
-- Fixed: when checkboxes are hidden on a board, a checked card no longer counts as done. Hidden checkboxes used to make relations look inactive (faint dashed arrows, blocked cards not dimmed)
+318de3b Add sorting by blocks
