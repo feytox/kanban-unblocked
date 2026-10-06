@@ -867,6 +867,12 @@ button.kanban-plugin__new-item-button {
   margin-inline-start: var(--size-4-2);
 }
 
+// Both centered, so the ring lines up with the date chip instead of its text baseline.
+.kanban-plugin__item-metadata:has(> .kanban-plugin__item-checklist-progress)
+  > .kanban-plugin__item-metadata-date-wrapper {
+  vertical-align: middle;
+}
+
 .kanban-plugin__item-metadata .is-button {
   cursor: var(--cursor);
   &:hover {
