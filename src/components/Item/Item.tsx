@@ -162,6 +162,7 @@ const ItemInner = memo(function ItemInner({
               : undefined
           }
           onHiddenUntilClick={isStatic ? undefined : pickHideUntil}
+          inCompleteList={shouldMarkItemsComplete}
         />
         {isBlocked && (
           <span

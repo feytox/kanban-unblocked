@@ -4,6 +4,7 @@ import { Dispatch, StateUpdater, useCallback } from 'preact/hooks';
 import { StateManager } from 'src/StateManager';
 import { Path } from 'src/dnd/types';
 import { moveEntity } from 'src/dnd/util/data';
+import { sanitizeFileName, splitCardText } from 'src/helpers/cardText';
 import { t } from 'src/lang/helpers';
 import { generateUniqueBlockId, getBoardBlockIds } from 'src/parsers/formats/list';
 import { addHideUntilMenuItems, addRelationMenuItems } from 'src/relations/menu';
@@ -58,14 +59,25 @@ export function useItemMenu({
             .setTitle(t('New note from card'))
             .onClick(async () => {
               const prevTitle = item.data.titleRaw.split('\n')[0].trim();
-              const sanitizedTitle = prevTitle
-                .replace(embedRegEx, '$1')
-                .replace(wikilinkRegEx, '$1')
-                .replace(mdLinkRegEx, '$1')
-                .replace(tagRegEx, '$1')
-                .replace(illegalCharsRegEx, ' ')
-                .trim()
-                .replace(condenceWhiteSpaceRE, ' ');
+              const textOnly = stateManager.getSetting('new-note-title') !== 'full';
+              const parts = textOnly
+                ? splitCardText(prevTitle, {
+                    date: stateManager.getSetting('date-trigger'),
+                    time: stateManager.getSetting('time-trigger'),
+                    unlock: stateManager.getSetting('unlock-trigger'),
+                  })
+                : null;
+
+              const sanitizedTitle = parts
+                ? sanitizeFileName(parts.text)
+                : prevTitle
+                    .replace(embedRegEx, '$1')
+                    .replace(wikilinkRegEx, '$1')
+                    .replace(mdLinkRegEx, '$1')
+                    .replace(tagRegEx, '$1')
+                    .replace(illegalCharsRegEx, ' ')
+                    .trim()
+                    .replace(condenceWhiteSpaceRE, ' ');
 
               const newNoteFolder = stateManager.getSetting('new-note-folder');
               const newNoteTemplatePath = stateManager.getSetting('new-note-template');
@@ -87,9 +99,18 @@ export function useItemMenu({
 
               await applyTemplate(stateManager, newNoteTemplatePath as string | undefined);
 
+              // Keep the card's wording when the file name had to differ from it.
+              const alias = parts?.text && parts.text !== newFile.basename ? parts.text : undefined;
+              const link = stateManager.app.fileManager.generateMarkdownLink(
+                newFile,
+                stateManager.file.path,
+                undefined,
+                alias
+              );
+
               const newTitleRaw = item.data.titleRaw.replace(
                 prevTitle,
-                stateManager.app.fileManager.generateMarkdownLink(newFile, stateManager.file.path)
+                parts ? [link, ...parts.metadata].join(' ') : link
               );
 
               boardModifiers.updateItem(path, stateManager.updateItemContent(item, newTitleRaw));

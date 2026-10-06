@@ -14,6 +14,10 @@ Boards stay plain Markdown and remain compatible with the original plugin. On to
   - Cycles can't happen. If you link two cards the other way round, the relation just flips. A link that would close a longer cycle is refused, and a notice shows the cycle.
 - **Effective deadlines.** A card that blocks something due earlier than itself shows _Needed by &lt;date&gt;_. The card's own date isn't changed.
 - **Time-blocking.** Add `@>{2026-10-01}` or `@>{2026-10-01 18:00}` to a card, or right-click it and pick _Hide until..._. The card stays dimmed until that moment and becomes normal on its own, no reload needed. This suits recurring tasks that wait in a "reload" list. _Show now_ removes the token. The trigger can be changed in the settings. A hidden card shows _Hidden until …_; click it to pick another date. Hovering a card also shows an hourglass button that hides it until a chosen date. Both can be turned off in the settings.
+- **Checklist progress.** A card that links to a note shows how many of the note's checkboxes are done, e.g. `3/7` with a small ring. Click it to open the note. Cancelled tasks (`[-]`) and checkboxes in code blocks don't count.
+  - To count only one section, add `%% kanban:progress %%` to its heading (the comment is hidden in reading view), or run _Toggle checklist progress on heading_ with the cursor anywhere in that section. Subsections are included. A link to a heading (`[[Note#Plan]]`) counts that heading's section.
+  - Without a marked section the whole note is counted. Settings can turn this off, turn progress off completely, or enable it for lists that mark cards complete (skipped by default).
+- **Cleaner notes from cards.** _New note from card_ names the note after the card text only: tags, dates, times, hide-until and inline fields stay on the card next to the new link. Settings → _New note name_ brings back the old behavior.
 - **Settings import.** _Settings → Kanban: Unblocked → Import settings from Kanban_ copies the original plugin's global settings.
 - Existing boards keep working as before. Relations and hide-until tokens are the only additions to the file format.
 

@@ -25,6 +25,7 @@ import { InheritedDeadline } from '../Relations/InheritedDeadline';
 import { KanbanContext, SearchContext } from '../context';
 import { c, useGetDateColorFn, useGetTagColorFn } from '../helpers';
 import { EditState, EditingState, Item, isEditing } from '../types';
+import { ChecklistProgress } from './ChecklistProgress';
 import { DateAndTime, RelativeDate } from './DateAndTime';
 import { InlineMetadata } from './InlineMetadata';
 import {
@@ -86,6 +87,8 @@ export interface ItemContentProps {
   inheritedDeadline?: CardInsight['inheritedDeadline'];
   hiddenUntil?: number;
   onHiddenUntilClick?: (e: MouseEvent) => void;
+  /** The card sits in a list that marks items complete. */
+  inCompleteList?: boolean;
   editState: EditState;
   isStatic: boolean;
 }
@@ -195,6 +198,7 @@ export const ItemContent = memo(function ItemContent({
   inheritedDeadline,
   hiddenUntil,
   onHiddenUntilClick,
+  inCompleteList,
   isStatic,
 }: ItemContentProps) {
   const { stateManager, filePath, boardModifiers } = useContext(KanbanContext);
@@ -311,6 +315,7 @@ export const ItemContent = memo(function ItemContent({
             filePath={filePath}
             getDateColor={getDateColor}
           />
+          <ChecklistProgress item={item} inCompleteList={inCompleteList} />
           <InheritedDeadline deadline={inheritedDeadline} />
           <HiddenUntil until={hiddenUntil} onClick={onHiddenUntilClick} />
           <InlineMetadata item={item} stateManager={stateManager} />

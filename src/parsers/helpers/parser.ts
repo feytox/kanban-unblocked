@@ -4,6 +4,8 @@ import { Item } from 'src/components/types';
 export interface FileAccessor {
   isEmbed: boolean;
   target: string;
+  /** `#Heading` part of a wikilink, if any. */
+  subpath?: string;
   stats?: Stat;
 }
 

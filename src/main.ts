@@ -20,6 +20,8 @@ import { getParentWindow } from './dnd/util/getWindow';
 import { hasFrontmatterKey } from './helpers';
 import { t } from './lang/helpers';
 import { basicFrontmatter, frontmatterKey } from './parsers/common';
+import { ChecklistStore } from './progress/ChecklistStore';
+import { toggleProgressMarker } from './progress/checklist';
 
 interface WindowRegistry {
   viewMap: Map<string, KanbanView>;
@@ -55,6 +57,8 @@ export default class KanbanPlugin extends Plugin {
 
   windowRegistry: Map<Window, WindowRegistry> = new Map();
 
+  checklists: ChecklistStore;
+
   _loaded: boolean = false;
 
   isShiftPressed: boolean = false;
@@ -88,6 +92,7 @@ export default class KanbanPlugin extends Plugin {
 
     this.stateManagers.clear();
     this.windowRegistry.clear();
+    this.checklists?.destroy();
     this.kanbanFileModes = {};
 
     (this.app.workspace as any).unregisterHoverLinkSource(frontmatterKey);
@@ -99,6 +104,7 @@ export default class KanbanPlugin extends Plugin {
     await this.loadSettings();
 
     this.MarkdownEditor = getEditorClass(this.app);
+    this.checklists = new ChecklistStore(this.app);
 
     this.registerEditorSuggest(new TimeSuggest(this.app, this));
     this.registerEditorSuggest(new DateSuggest(this.app, this));
@@ -230,7 +236,8 @@ export default class KanbanPlugin extends Plugin {
           view,
           data,
           () => this.stateManagers.delete(file),
-          () => this.settings
+          () => this.settings,
+          this.checklists
         )
       );
     }
@@ -547,9 +554,15 @@ export default class KanbanPlugin extends Plugin {
     );
 
     this.registerEvent(
-      app.metadataCache.on('changed', (file) => {
+      app.metadataCache.on('changed', (file, data) => {
+        this.checklists.onChanged(file, data);
         notifyFileChange(file);
       })
+    );
+
+    this.registerEvent(app.vault.on('delete', (file) => this.checklists.onRemoved(file)));
+    this.registerEvent(
+      app.vault.on('rename', (file, oldPath) => this.checklists.onRemoved(file, oldPath))
     );
 
     this.registerEvent(
@@ -573,6 +586,27 @@ export default class KanbanPlugin extends Plugin {
   }
 
   registerCommands() {
+    this.addCommand({
+      id: 'toggle-checklist-progress-heading',
+      name: t('Toggle checklist progress on heading'),
+      editorCheckCallback: (checking, editor) => {
+        // The heading the cursor is under, so this works from anywhere in the section.
+        for (let line = editor.getCursor().line; line >= 0; line--) {
+          const toggled = toggleProgressMarker(editor.getLine(line));
+          if (toggled === null) continue;
+          if (!checking) {
+            editor.replaceRange(
+              toggled,
+              { line, ch: 0 },
+              { line, ch: editor.getLine(line).length }
+            );
+          }
+          return true;
+        }
+        return false;
+      },
+    });
+
     this.addCommand({
       id: 'create-new-kanban-board',
       name: t('Create new board'),

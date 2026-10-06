@@ -821,6 +821,52 @@ button.kanban-plugin__new-item-button {
   }
 }
 
+// Inline, so it shares a line with the date instead of adding one.
+.kanban-plugin__item-metadata > .kanban-plugin__item-checklist-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-2-2);
+  margin-inline-end: var(--size-4-2);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-variant-numeric: tabular-nums;
+  vertical-align: middle;
+  cursor: var(--cursor);
+
+  &:hover {
+    color: var(--text-normal);
+  }
+
+  svg {
+    width: var(--icon-xs);
+    height: var(--icon-xs);
+    flex-shrink: 0;
+    transform: rotate(-90deg);
+  }
+
+  circle {
+    fill: none;
+    stroke-width: 2.5;
+  }
+
+  .kanban-plugin__progress-track {
+    stroke: var(--background-modifier-border);
+  }
+
+  .kanban-plugin__progress-value {
+    stroke: var(--interactive-accent);
+    stroke-linecap: round;
+  }
+
+  &.is-complete .kanban-plugin__progress-value {
+    stroke: var(--color-green);
+  }
+}
+
+.kanban-plugin__item-metadata-date-wrapper + .kanban-plugin__item-checklist-progress {
+  margin-inline-start: var(--size-4-2);
+}
+
 .kanban-plugin__item-metadata .is-button {
   cursor: var(--cursor);
   &:hover {

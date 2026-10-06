@@ -9,6 +9,7 @@ import { Board, BoardTemplate, Item } from './components/types';
 import { ListFormat } from './parsers/List';
 import { BaseFormat, frontmatterKey, shouldRefreshBoard } from './parsers/common';
 import { getTaskStatusDone } from './parsers/helpers/inlineMetadata';
+import { ChecklistStore } from './progress/ChecklistStore';
 import { RelationStore } from './relations/RelationStore';
 import { createItemCardAdapter } from './relations/cardAdapter';
 import {
@@ -43,7 +44,8 @@ export class StateManager {
     initialView: KanbanView,
     initialData: string,
     onEmpty: () => void,
-    getGlobalSettings: () => KanbanSettings
+    getGlobalSettings: () => KanbanSettings,
+    public checklists: ChecklistStore
   ) {
     this.app = app;
     this.file = initialView.file;
@@ -271,6 +273,13 @@ export class StateManager {
       'show-search': this.getSettingRaw('show-search', suppliedSettings) ?? true,
       'show-set-view': this.getSettingRaw('show-set-view', suppliedSettings) ?? true,
       'show-relations': this.getSettingRaw('show-relations', suppliedSettings) ?? false,
+      'show-checklist-progress':
+        this.getSettingRaw('show-checklist-progress', suppliedSettings) ?? true,
+      'checklist-progress-whole-note':
+        this.getSettingRaw('checklist-progress-whole-note', suppliedSettings) ?? true,
+      'checklist-progress-in-complete-lists':
+        this.getSettingRaw('checklist-progress-in-complete-lists', suppliedSettings) ?? false,
+      'new-note-title': this.getSettingRaw('new-note-title', suppliedSettings) ?? 'text',
       'show-hidden-until': this.getSettingRaw('show-hidden-until', suppliedSettings) ?? true,
       'show-hide-until-button':
         this.getSettingRaw('show-hide-until-button', suppliedSettings) ?? true,

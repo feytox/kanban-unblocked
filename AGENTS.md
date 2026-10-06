@@ -29,6 +29,8 @@ To try a build, copy `main.js`, `manifest.json` and `styles.css` into `<vault>/.
 - `src/relations/`: all relation and availability logic.
   - Pure and unit-tested (these files must not import `obsidian` or Preact): `types.ts`, `graph.ts` (immutable add/flip/cycle-check/prune), `serialize.ts` (the `%% kanban:relations` block), `RelationIndex.ts` (adjacency, connected graph, effective deadlines), `availability.ts` (pluggable "can I do this now?" rules), `insights.ts` (per-card derived data).
   - Integration with the app: `RelationStore.ts` (recomputes insights once per board change, notifies only the cards that changed, schedules a timer for the next unlock), `cardAdapter.ts`, `actions.ts`, `menu.ts`, `CardSuggestModal.ts`.
+- `src/progress/`: checklist progress of linked notes. `checklist.ts` is pure and tested (parses a note once, then counts any section; `%% kanban:progress %%` marks a heading). `ChecklistStore.ts` is one plugin-wide cache: reads notes with `cachedRead`, refreshes them from `metadataCache` `changed`, and notifies only the cards that show a changed note (`useChecklist`).
+- `src/helpers/cardText.ts`: pure split of a card line into text and metadata tokens, used by _New note from card_.
 - `src/components/`: Preact UI. `Kanban.tsx` is the board root, `Item/` holds cards, `Relations/` holds the arrow overlay, relation chips, the inherited deadline and the hidden-until chip.
 - `src/dnd/`: custom drag and drop. `dragManager.emitter` emits `dragStart`, `dragMove` and `dragEnd`.
 - `src/Settings.ts`: the `KanbanSettings` type, `settingKeyLookup` (keys allowed in board frontmatter/footer) and the settings UI. Add every new setting to all three places, plus defaults in `StateManager.compileSettings`.

@@ -315,6 +315,25 @@ const en = {
   'Show hide-until button on cards': 'Show hide-until button on cards',
   'When toggled, hovering a card shows a button that hides it until a chosen date.':
     'When toggled, hovering a card shows a button that hides it until a chosen date.',
+
+  // Checklist progress and new notes
+  'New note name': 'New note name',
+  'Card text only: tags, dates and other metadata are left out of the note name and stay on the card next to the link. Whole first line: the whole line becomes the name and is replaced by the link.':
+    'Card text only: tags, dates and other metadata are left out of the note name and stay on the card next to the link. Whole first line: the whole line becomes the name and is replaced by the link.',
+  'Card text only': 'Card text only',
+  'Whole first line': 'Whole first line',
+  'Checklist progress': 'Checklist progress',
+  'Show checklist progress on cards': 'Show checklist progress on cards',
+  'When toggled, cards that link to a note show how many of its checkboxes are done. To count only one section, add %% kanban:progress %% to its heading (or use the "Toggle checklist progress on heading" command), or link to the heading itself.':
+    'When toggled, cards that link to a note show how many of its checkboxes are done. To count only one section, add %% kanban:progress %% to its heading (or use the "Toggle checklist progress on heading" command), or link to the heading itself.',
+  'Count the whole note when no section is marked':
+    'Count the whole note when no section is marked',
+  'When turned off, progress is shown only for notes with a marked or linked section.':
+    'When turned off, progress is shown only for notes with a marked or linked section.',
+  'Show progress in completed lists': 'Show progress in completed lists',
+  'When turned off, cards in lists that mark items complete skip counting.':
+    'When turned off, cards in lists that mark items complete skip counting.',
+  'Toggle checklist progress on heading': 'Toggle checklist progress on heading',
 };
 
 export type Lang = typeof en;

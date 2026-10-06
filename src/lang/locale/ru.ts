@@ -259,6 +259,24 @@ const lang: Partial<Lang> = {
   'Show hide-until button on cards': 'Кнопка «Скрыть до» на карточках',
   'When toggled, hovering a card shows a button that hides it until a chosen date.':
     'При наведении на карточку появляется кнопка, которая скрывает её до выбранной даты.',
+
+  // Checklist progress and new notes
+  'New note name': 'Имя новой заметки',
+  'Card text only: tags, dates and other metadata are left out of the note name and stay on the card next to the link. Whole first line: the whole line becomes the name and is replaced by the link.':
+    'Только текст карточки: теги, даты и другие метаданные не попадают в имя заметки и остаются на карточке рядом со ссылкой. Вся первая строка: вся строка становится именем и заменяется ссылкой.',
+  'Card text only': 'Только текст карточки',
+  'Whole first line': 'Вся первая строка',
+  'Checklist progress': 'Прогресс чек-листа',
+  'Show checklist progress on cards': 'Показывать прогресс чек-листа на карточках',
+  'When toggled, cards that link to a note show how many of its checkboxes are done. To count only one section, add %% kanban:progress %% to its heading (or use the "Toggle checklist progress on heading" command), or link to the heading itself.':
+    'Карточки со ссылкой на заметку показывают, сколько чекбоксов в ней выполнено. Чтобы считать только один раздел, добавьте %% kanban:progress %% в его заголовок (или используйте команду "Переключить подсчёт прогресса для заголовка") либо сошлитесь на сам заголовок.',
+  'Count the whole note when no section is marked': 'Считать всю заметку, если раздел не отмечен',
+  'When turned off, progress is shown only for notes with a marked or linked section.':
+    'Если выключено, прогресс показывается только для заметок с отмеченным разделом или ссылкой на заголовок.',
+  'Show progress in completed lists': 'Показывать прогресс в завершающих списках',
+  'When turned off, cards in lists that mark items complete skip counting.':
+    'Если выключено, карточки в списках, которые отмечают карточки выполненными, не пересчитываются.',
+  'Toggle checklist progress on heading': 'Переключить подсчёт прогресса для заголовка',
 };
 
 export default lang;

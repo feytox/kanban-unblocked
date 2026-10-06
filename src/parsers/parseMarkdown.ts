@@ -124,6 +124,7 @@ function getMdastExtensions(stateManager: StateManager) {
 
       node.fileAccessor = {
         target: normalizedPath.root,
+        subpath: normalizedPath.subpath || undefined,
         isEmbed: false,
       } as FileAccessor;
 

@@ -58,6 +58,8 @@ export interface KanbanSettings {
   'archive-date-format'?: string;
   'archive-date-separator'?: string;
   'archive-with-date'?: boolean;
+  'checklist-progress-in-complete-lists'?: boolean;
+  'checklist-progress-whole-note'?: boolean;
   'date-colors'?: DateColor[];
   'date-display-format'?: string;
   'date-format'?: string;
@@ -79,10 +81,12 @@ export interface KanbanSettings {
   'new-line-trigger'?: 'enter' | 'shift-enter';
   'new-note-folder'?: string;
   'new-note-template'?: string;
+  'new-note-title'?: 'text' | 'full';
   'show-add-list'?: boolean;
   'show-archive-all'?: boolean;
   'show-board-settings'?: boolean;
   'show-checkboxes'?: boolean;
+  'show-checklist-progress'?: boolean;
   'show-hidden-until'?: boolean;
   'show-hide-until-button'?: boolean;
   'show-relations'?: boolean;
@@ -111,6 +115,8 @@ export const settingKeyLookup: Set<keyof KanbanSettings> = new Set([
   'archive-date-format',
   'archive-date-separator',
   'archive-with-date',
+  'checklist-progress-in-complete-lists',
+  'checklist-progress-whole-note',
   'date-colors',
   'date-display-format',
   'date-format',
@@ -132,10 +138,12 @@ export const settingKeyLookup: Set<keyof KanbanSettings> = new Set([
   'new-line-trigger',
   'new-note-folder',
   'new-note-template',
+  'new-note-title',
   'show-add-list',
   'show-archive-all',
   'show-board-settings',
   'show-checkboxes',
+  'show-checklist-progress',
   'show-hidden-until',
   'show-hide-until-button',
   'show-relations',
@@ -533,6 +541,29 @@ export class SettingsManager {
           manager: this,
         })
       );
+
+    new Setting(contentEl)
+      .setName(t('New note name'))
+      .setDesc(
+        t(
+          'Card text only: tags, dates and other metadata are left out of the note name and stay on the card next to the link. Whole first line: the whole line becomes the name and is replaced by the link.'
+        )
+      )
+      .addDropdown((dropdown) => {
+        dropdown.addOption('text', t('Card text only'));
+        dropdown.addOption('full', t('Whole first line'));
+
+        const [value, globalValue] = this.getSetting('new-note-title', local);
+
+        dropdown.setValue((value as string) || (globalValue as string) || 'text');
+        dropdown.onChange((value) => {
+          this.applySettingsUpdate({
+            'new-note-title': {
+              $set: value as 'text' | 'full',
+            },
+          });
+        });
+      });
 
     contentEl.createEl('h4', { text: t('Tags') });
 
@@ -1409,6 +1440,31 @@ export class SettingsManager {
       name: t('Show hide-until button on cards'),
       desc: t('When toggled, hovering a card shows a button that hides it until a chosen date.'),
       defaultValue: true,
+    });
+
+    contentEl.createEl('h4', { text: t('Checklist progress') });
+
+    this.addToggleSetting(contentEl, local, {
+      key: 'show-checklist-progress',
+      name: t('Show checklist progress on cards'),
+      desc: t(
+        'When toggled, cards that link to a note show how many of its checkboxes are done. To count only one section, add %% kanban:progress %% to its heading (or use the "Toggle checklist progress on heading" command), or link to the heading itself.'
+      ),
+      defaultValue: true,
+    });
+
+    this.addToggleSetting(contentEl, local, {
+      key: 'checklist-progress-whole-note',
+      name: t('Count the whole note when no section is marked'),
+      desc: t('When turned off, progress is shown only for notes with a marked or linked section.'),
+      defaultValue: true,
+    });
+
+    this.addToggleSetting(contentEl, local, {
+      key: 'checklist-progress-in-complete-lists',
+      name: t('Show progress in completed lists'),
+      desc: t('When turned off, cards in lists that mark items complete skip counting.'),
+      defaultValue: false,
     });
 
     contentEl.createEl('h4', { text: t('Board Header Buttons') });
