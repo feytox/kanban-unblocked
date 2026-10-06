@@ -1,1 +1,2 @@
-318de3b Add sorting by blocks
+- Added: checklist progress on cards. A card that links to a note shows how many of its checkboxes are done (e.g. `3/7`); click it to open the note. Add `%% kanban:progress %%` to a heading (or run "Toggle checklist progress on heading") to count only that section, or link to the heading itself. Cancelled `[-]` tasks and code blocks are ignored. Settings can turn it off, skip notes without a marked section, or enable it in lists that mark cards complete
+- Changed: "New note from card" names the note after the card text only. Tags, dates, times, hide-until and inline fields stay on the card next to the new link. Settings > "New note name" brings back the old behavior
