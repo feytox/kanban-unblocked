@@ -1,7 +1,7 @@
 {
 	"id": "kanban-unblocked",
 	"name": "Kanban: Unblocked",
-	"version": "3.3.0",
+	"version": "3.3.1",
 	"minAppVersion": "1.0.0",
 	"description": "Markdown-backed Kanban boards with blocking relations between cards and time-blocking.",
 	"author": "Feytox",
